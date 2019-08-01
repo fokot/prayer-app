@@ -1,0 +1,12 @@
+mobile/node_modules/**/*
+mobile/.expo/*
+npm-debug.*
+*.jks
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+mobile/web-build/
+mobile/web-report/
+.idea
+*.log
