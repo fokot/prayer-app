@@ -1,5 +1,7 @@
 # PrayerApp
 
+![icon](mobile/assets/icon.png)
+
 **PrayerApp** is react native app for daily prayers
 
 <img src="screenshot.png" width="429" height="720" />
