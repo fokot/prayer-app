@@ -1,5 +1,5 @@
 import {Text, TouchableOpacity, View} from "react-native";
-import {toggleFavorite} from "../utils/Storage";
+import {toggleFavorite} from "../utils/PrayerStore";
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 

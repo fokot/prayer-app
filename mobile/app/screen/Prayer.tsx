@@ -1,7 +1,7 @@
 import React, {Component, useEffect, useState} from "react";
 import {Text, TouchableOpacity, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, toggleFavorite, deletePrayer} from "../utils/Storage";
+import {usePrayer, toggleFavorite, deletePrayer} from "../utils/PrayerStore";
 
 const Icon = (props: any) =>
   <Ionicons size={32}

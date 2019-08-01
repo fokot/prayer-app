@@ -1,7 +1,7 @@
-import React, {Component, useEffect, useState} from "react";
-import {Text, TextInput, TouchableOpacity, View} from "react-native";
+import React, {useState} from "react";
+import {TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, toggleFavorite, deletePrayer, savePrayer} from "../utils/Storage";
+import {usePrayer, savePrayer} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
 import uuid from 'uuid/v1';
 

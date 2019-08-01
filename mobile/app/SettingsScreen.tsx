@@ -1,6 +1,6 @@
 import {Button, Picker, Slider, Switch, View, Text} from "react-native";
 import React from "react";
-import {withStore, toggleDarkMode, useStore, useBackgroundColor} from "./utils/Storage";
+import {toggleDarkMode, useStore, useBackgroundColor} from "./utils/PrayerStore";
 
 // const SettingsScreen = ({ darkMode }) => (
 export const SettingsScreen = () => {
@@ -56,7 +56,3 @@ export const SettingsScreen = () => {
     </View>
   </View>
 )};
-
-// export const SettingsScreen = withStore(SettingsScreenX,
-//   state => ({darkMode: state.settings.darkMode})
-// );

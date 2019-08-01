@@ -7,7 +7,7 @@ import {
   useAllPrayers,
   toggleFavorite,
   reorderFavoritePrayers
-} from "../utils/Storage";
+} from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 

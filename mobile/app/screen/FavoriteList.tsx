@@ -3,7 +3,7 @@ import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
   useFavoritePrayers, reorderFavoritePrayers
-} from "../utils/Storage";
+} from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 
