@@ -7,8 +7,9 @@ import {
   toggleFavorite,
   getCdnPrayers,
   addCdnPrayers, replaceCdnPrayers
-} from "./utils/PrayerStore";
+} from "../utils/PrayerStore";
 import { Ionicons } from '@expo/vector-icons';
+import {RenderSeparator} from "./ListItemsComponents";
 
 export const SettingsScreen = () => {
   const darkMode = useStore(s => s.settings.darkMode);
@@ -77,37 +78,41 @@ const PrayerModal = ({closeModal}) => {
   const [prayers, setPrayers] = useState([]);
   useEffect(
     () => {
-      getCdnPrayers().then(setPrayers)
+      getCdnPrayers().then(setPrayers);
       return () => {};
-    }
+    }, []
   );
   const [selectedPrayer, setSelectedPrayer] = useState(null);
   return (
-    selectedPrayer ?
-      <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
       <View style={{margin: 22}}>
-        <View>
-          <Ionicons name="md-close"
-                    onPress={closeModal}
-                    size={32} color="green" />
-          {prayers.length < 1 ?
-            <Text>Loading...</Text> :
-            <FlatList
-              data={prayers}
-              renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)} />}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          }
-        </View>
+        {selectedPrayer ?
+        <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
+          <View>
+            <Ionicons name="md-close"
+                      onPress={closeModal}
+                      size={32} color="green" />
+            {prayers.length < 1 ?
+              <Text>Loading...</Text> :
+              <FlatList
+                data={prayers}
+                renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)} />}
+                keyExtractor={(item, index) => index.toString()}
+                ItemSeparatorComponent={RenderSeparator}
+              />
+            }
+          </View>
+        }
       </View>
   );
 }
 
 const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
   <Text style={{
+    padding: 16,
     fontWeight: 'bold',
     color: 'black',
-    fontSize: 16,
+    fontSize: 24,
+    textAlign: 'center',
   }}
   onPress={selectPrayer}
   >{name}</Text>
@@ -115,7 +120,18 @@ const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
 
 const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
   <View>
-    <Text>{name}</Text>
+    <Ionicons name="md-close"
+              onPress={closeModal}
+              size={32} color="green" />
+    <Text
+      style={{
+        padding: 16,
+        fontWeight: 'bold',
+        color: 'black',
+        fontSize: 24,
+        textAlign: 'center',
+      }}
+    >{name}</Text>
     <Button
       onPress={() =>
         addCdnPrayers(file).then(closeModal())

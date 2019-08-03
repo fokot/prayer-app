@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "aa",
-    "slug": "aa",
+    "name": "PrayerApp",
+    "slug": "prayer-app",
     "privacy": "public",
     "sdkVersion": "33.0.0",
     "platforms": [
@@ -27,7 +27,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.fokot.rn"
+      "package": "com.fokot.prayerApp"
     }
   }
 }

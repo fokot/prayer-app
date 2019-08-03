@@ -1,6 +1,6 @@
 import React from 'react';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
-import PrayerList from "./PrayerList";
+import PrayerList from "./screen/PrayerList";
 import { Prayer } from "./screen/Prayer";
 import {PrayerEdit} from "./screen/PrayerEdit";
 

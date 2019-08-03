@@ -3,8 +3,8 @@ import {StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {createMaterialTopTabNavigator} from "react-navigation";
 import {SettingsScreen} from "./SettingsScreen";
-import {AllList} from "./screen/AllList";
-import {FavoriteList} from "./screen/FavoriteList";
+import {AllList} from "./AllList";
+import {FavoriteList} from "./FavoriteList";
 
 const TabBarIcon = (name) => ({focused, }) =>
   (<Ionicons size={32} name={name} color={focused ? 'green' : 'black'} />);
