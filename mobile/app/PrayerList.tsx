@@ -32,7 +32,7 @@ const HomeScreen = createMaterialTopTabNavigator(
     },
   },
   {
-    initialRouteName: 'All',
+    initialRouteName: 'Settings',
     tabBarOptions: {
       showIcon: true,
       showLabel: false,

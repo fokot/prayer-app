@@ -63,6 +63,7 @@ export const createStore = <S,>(initialStore: S) => {
       );
       listeners = append(listener, listeners);
       return state;
-    }
+    },
+    currentStore: () => store,
   })
 };

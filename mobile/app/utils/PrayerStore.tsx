@@ -1,8 +1,8 @@
 import {AsyncStorage} from 'react-native';
 import prayers, {Prayer, PrayerFull} from "./Prayers";
-import {append, assoc, dissoc, fromPairs, mergeDeepRight, without} from "ramda";
+import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, toPairs} from "ramda";
 import {createStore} from "./Store";
-
+import uuid from 'uuid/v1';
 
 
 // database keys
@@ -30,6 +30,12 @@ const dbSetFavoritePrayerIds = (ids) =>
 
 const dbSavePrayer = (prayer) =>
   AsyncStorage.setItem(prayer.id, JSON.stringify(prayer));
+
+const dbSavePrayers = (prayerPairs) =>
+  AsyncStorage.multiSet(prayerPairs.map(p => [p[0], JSON.stringify(p[1])]));
+
+const dbDeletePrayers = (ids) =>
+  AsyncStorage.multiRemove(ids);
 
 const dbDeletePrayer = (id) =>
   AsyncStorage.removeItem(id);
@@ -60,7 +66,7 @@ const initialStore: StoreType = {
 };
 
 // create store
-const { updateStore, useStore } = createStore(initialStore);
+const { updateStore, useStore, currentStore } = createStore(initialStore);
 export { useStore };
 
 const readAllData = async (): Promise<StoreType> => {
@@ -147,6 +153,55 @@ export const usePrayer = (id: string): PrayerFull => useStore(s => ({...s.prayer
 
 export const useFavoritePrayers = () => useStore(s => s.favoritePrayerIds.map(id => ({...s.prayers[id], favorite: true})))
 
+
+// NETWORK
+
+const STORAGE_PATH = 'https://storage.googleapis.com/prayers/';
+
+export const getCdnPrayers = () =>
+  fetch(`${STORAGE_PATH}all.json`).then(x => x.json());
+
+const loadCdnPrayers = (fileName) =>
+  fetch(`${STORAGE_PATH}${fileName}`).then(x => x.json());
+
+export const addCdnPrayers = async (fileName) => {
+  const prayers = await loadCdnPrayers(fileName);
+  const toPair = (p) => {
+    const id = uuid();
+    return [id, ({...p, id})];
+  };
+  const pairs = prayers.map(toPair);
+  const store = updateStore(
+    s => ({
+      ...s,
+      prayers: fromPairs(concat(toPairs(s.prayers), pairs)),
+      allPrayerIds: concat(s.allPrayerIds, pairs.map(p => p[0])),
+    })
+  );
+  await dbSavePrayers(pairs);
+  await dbSetAllPrayerIds(store.allPrayerIds);
+};
+
+export const replaceCdnPrayers = async (fileName) => {
+  const prayers = await loadCdnPrayers(fileName);
+  const toPair = (p) => {
+    const id = uuid();
+    return [id, ({...p, id})];
+  };
+  const pairs = prayers.map(toPair);
+  const idsToDelete = currentStore().allPrayerIds;
+  const store = updateStore(
+    s => ({
+      ...s,
+      prayers: fromPairs(pairs),
+      allPrayerIds: pairs.map(p => p[0]),
+      favoritePrayerIds: [],
+    })
+  );
+  await dbDeletePrayers(idsToDelete);
+  await dbSavePrayers(pairs);
+  await dbSetAllPrayerIds(store.allPrayerIds);
+};
 
 
 

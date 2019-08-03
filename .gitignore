@@ -10,3 +10,4 @@ mobile/web-build/
 mobile/web-report/
 .idea
 *.log
+/prayers
