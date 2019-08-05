@@ -11,3 +11,4 @@ mobile/web-report/
 .idea
 *.log
 /prayers
+.stack-work
