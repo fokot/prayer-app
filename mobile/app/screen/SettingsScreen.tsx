@@ -15,6 +15,7 @@ export const SettingsScreen = () => {
   const darkMode = useStore(s => s.settings.darkMode);
   const backgroundColor = useBackgroundColor();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
+  const [showSync, setShowSync] = useState(false);
   const closeModal = () => setShowPrayersPicker(false);
   return (
   <View
@@ -59,8 +60,8 @@ export const SettingsScreen = () => {
       }}
     >
       <Button
-        onPress={() => alert('pressed')}
-        title="Edit in browserk"
+        onPress={() => setShowSync(true)}
+        title="Edit in browser"
         color="#841584"
       />
     </View>
@@ -71,8 +72,37 @@ export const SettingsScreen = () => {
       onRequestClose={closeModal}>
       <PrayerModal closeModal={closeModal}/>
     </Modal>
+    <Modal
+      animationType="slide"
+      transparent={false}
+      visible={showSync}
+      onRequestClose={() => setShowSync(false)}>
+      <Sync />
+    </Modal>
   </View>
 )};
+
+const random4digits = () =>
+  (Math.floor(Math.random() * 10000)).toString().padStart(4, "0");
+
+const Sync = () => {
+  useEffect(
+    () => {
+      var ws = new WebSocket('ws://192.168.0.26:8080/');
+
+      ws.onmessage = function(event) {
+        alert('Count is: ' + event.data);
+      };
+      return () => ws.close();
+    }
+  );
+  return (
+    <View>
+      <Text>Syncing...</Text>
+      <Text>{random4digits()}</Text>
+    </View>
+  );
+}
 
 const PrayerModal = ({closeModal}) => {
   const [prayers, setPrayers] = useState([]);
