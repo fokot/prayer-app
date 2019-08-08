@@ -12,3 +12,5 @@ mobile/web-report/
 *.log
 /prayers
 .stack-work
+web/elm-stuff
+web/elm.js
