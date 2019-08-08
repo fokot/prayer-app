@@ -25,6 +25,15 @@ import qualified Text.Printf                    as Printf (printf)
 import qualified Web.Scotty                     as Sc
 import Data.Monoid (mconcat)
 
+type ClientId = String
+type Message  = Text.Text
+type Client   = (ClientId, WS.Connection, Concurrent.MVar Message)
+type State    = [Client]
+
+first  (x, _, _) = x
+second (_, x, _) = x
+third  (_, _, x) = x
+
 main :: IO ()
 main = do
   state <- Concurrent.newMVar []
@@ -43,64 +52,49 @@ scottyApp stateRef = do
       response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef (Text.pack "get")
       Sc.setHeader "Content-Type" "application/json"
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
---      Sc.html $ mconcat ["<h1>Scotty, ", xx, " me up!</h1>"]
---      undefined
---    Sc.put "/:clientId" $ do
---      clientId <- Sc.param "clientId"
---      Sc.liftAndCatchIO $ sendToClient (LazyText.unpack clientId) stateRef (Text.pack "put")
---      Sc.html $ mconcat ["<h1>Put, ", clientId, "</h1>"]
-
-httpApp :: Wai.Application
-httpApp _ respond = respond $ Wai.responseLBS Http.status400 [] "Not a websocket request"
-
-type ClientId = String
-type Client   = (ClientId, WS.Connection)
-type State    = [Client]
+    Sc.put "/:clientId" $ do
+      clientId <- Sc.param "clientId"
+      body <- Encoding.decodeUtf8 <$> LazyByteString.toStrict <$> Sc.body
+      response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef body
+      Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
 
 nextId :: State -> IO ClientId
 nextId s =
-  let ids = List.map fst s
+  let ids = List.map first s
   in  MLoops.iterateWhile (`elem` ids) (Random.randomRIO (0, 9999) <&> fourDigits)
 
 fourDigits :: Int -> String
 fourDigits = Printf.printf "%04d"
 
-connectClient :: WS.Connection -> Concurrent.MVar State -> IO ClientId
+connectClient :: WS.Connection -> Concurrent.MVar State -> IO (ClientId, Concurrent.MVar Message)
 connectClient conn stateRef = Concurrent.modifyMVar stateRef $ \state -> do
   clientId <- nextId state
-  WS.sendTextData conn (Text.pack clientId) *> return ((clientId, conn) : state, clientId)
+  messageRef <- Concurrent.newEmptyMVar
+  WS.sendTextData conn (Text.pack clientId) *> return ((clientId, conn, messageRef) : state, (clientId, messageRef))
 
 withoutClient :: ClientId -> State -> State
-withoutClient clientId = List.filter ((/=) clientId . fst)
+withoutClient clientId = List.filter ((/=) clientId . first)
 
 disconnectClient :: ClientId -> Concurrent.MVar State -> IO ()
 disconnectClient clientId stateRef = Concurrent.modifyMVar_ stateRef $ \state ->
   return $ withoutClient clientId state
 
-listen :: WS.Connection -> ClientId -> Concurrent.MVar State -> IO ()
-listen conn clientId stateRef = Monad.forever $ do
-  WS.receiveData conn >>= broadcast clientId stateRef
+listen :: WS.Connection -> ClientId -> Concurrent.MVar Message -> IO ()
+listen conn clientId messageRef = Monad.forever $ do
+  WS.receiveData conn >>= Concurrent.putMVar messageRef
 
 sendToClientWithResponse :: ClientId -> Concurrent.MVar State -> Text.Text -> IO Text.Text
 sendToClientWithResponse clientId stateRef msg = do
   clients <- Concurrent.readMVar stateRef
-  let conn = snd $ Maybe.fromJust $ List.find ((==) clientId . fst) clients
+  let (_, conn, messageRef) = Maybe.fromJust $ List.find ((==) clientId . first) clients
   WS.sendTextData conn msg
-  WS.receiveData conn
-
-broadcast :: ClientId -> Concurrent.MVar State -> Text.Text -> IO ()
-broadcast clientId stateRef msg = do
-  clients <- Concurrent.readMVar stateRef
-  let otherClients = withoutClient clientId clients
-  Monad.forM_ otherClients $ \(_, conn) ->
-    WS.sendTextData conn msg
-
+  Concurrent.takeMVar messageRef
 
 wsApp :: Concurrent.MVar State -> WS.ServerApp
 wsApp stateRef pendingConn = do
   conn <- WS.acceptRequest pendingConn
-  clientId <- connectClient conn stateRef
+  (clientId, messageRef) <- connectClient conn stateRef
   WS.forkPingThread conn 30
   Exception.finally
-    (listen conn clientId stateRef)
+    (listen conn clientId messageRef)
     (disconnectClient clientId stateRef)
