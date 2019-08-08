@@ -23,3 +23,7 @@ executable server
                      , websockets
                      , http-types
                      , safe
+                     , random
+                     , monad-loops
+                     , scotty
+                     , bytestring
