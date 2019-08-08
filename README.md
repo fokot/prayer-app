@@ -13,6 +13,8 @@
 
 ## Project Organisation
 - mobile - react-native mobile app
+- server - haskell server
+- web    - elm web app
 
 ## TODO
 - cleaner design
