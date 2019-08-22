@@ -28,6 +28,9 @@
     },
     "android": {
       "package": "com.fokot.prayerApp"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "blue"
     }
   }
 }
