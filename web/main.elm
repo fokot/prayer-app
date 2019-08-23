@@ -1,16 +1,18 @@
 import Browser
-import List
 import Html exposing (Html)
-import Element exposing (Attribute, Element, column, el, text, row, alignLeft, alignRight, fill, width, rgb255, spacing, centerY, centerX, padding)
-import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
-import Element.Events exposing (onClick)
-import Debug exposing (log)
-import Html.Events exposing (on)
-import Html.Attributes exposing (attribute)
-import Json.Decode as Json
+import Element exposing (Attribute, Element, row, column, fill, width, spacing, centerY, centerX)
 import DnDList
+import Model exposing (Prayer, maybeGet)
+import PrayerEdit
+import PrayerList
+import Platform.Sub as Sub
+import Platform.Cmd as Cmd
+import Model exposing (Model, addPrayer, maybeExists)
+import QRCode
+import Tuple exposing (mapSecond)
+import Element.Input
+import Random
+import Uuid exposing (uuidGenerator, Uuid)
 
 -- MAIN
 
@@ -20,165 +22,92 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = subscriptions
+        , subscriptions =  PrayerList.subscriptions >> Sub.map PrayerListMsg
         }
 
 
--- MODEL
-
-type alias Prayer =
-  { id   : String
-  , name : String
-  , text : String
-  }
-
-type alias Model =
-  { dnd : DnDList.Model
-  , prayers: List Prayer
-  , openPrayer: Prayer
-  }
-
-
+u : String -> Uuid
+u id = id |> Uuid.fromString |> maybeGet
 
 initialModel : Model
 initialModel =
   {
-  dnd = system.model,
+  dnd = PrayerList.system.model,
   prayers = [
-    {id = "1", name = "11", text = "111"},
-    {id = "2", name = "22", text = "222"},
-    {id = "3", name = "3", text = "3"},
-    {id = "4", name = "4", text = "4"},
-    {id = "5", name = "5", text = "5"},
-    {id = "6", name = "6", text = "6"},
-    {id = "7", name = "7", text = "7"}
+    {id = u "2c8ad631-3944-4208-a1c4-53533f56f10d" , name = "1", text = "1", favorite = False},
+    {id = u "30932625-5359-448c-84a4-1a268180b11e", name = "2", text = "2", favorite = False},
+    {id = u "b2f1b200-6f90-430d-beb3-12756c5bd12d", name = "3", text = "3", favorite = False},
+    {id = u "73b950be-027a-41d2-a994-531e0ea040d7", name = "4", text = "4", favorite = False},
+    {id = u "2a2d1611-c1ee-4431-a6a5-a1ff6ec246ff", name = "5", text = "5", favorite = False}
   ],
-  openPrayer = {id = "1", name = "11", text = "111"}
+  favorites = [],
+  openPrayer = Nothing,
+  code = Just "aaaa"
   }
 
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( initialModel, Cmd.none )
 
-
--- SYSTEM
-
-
-config : DnDList.Config Prayer
-config =
-    { beforeUpdate = \_ _ list -> list
-    , movement = DnDList.Free
-    , listen = DnDList.OnDrag
-    , operation = DnDList.Rotate
-    }
-
-
-system : DnDList.System Prayer Msg
-system =
-    DnDList.create config Drag
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    system.subscriptions model.dnd
-
-
 -- UPDATE
 
-type Msg = OpenPrayer Prayer | Drag DnDList.Msg
+type Msg
+  =  PrayerListMsg PrayerList.Msg
+  | PrayerEditMsg PrayerEdit.Msg
+  | New
+  | NewRandomId Uuid
+  | Load
+  | Save
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
-    OpenPrayer p -> ({ model | openPrayer = p }, Cmd.none)
-    Drag msg ->
-      let
-          ( dnd, prayers ) =
-              system.update msg model.dnd model.prayers
-      in
-      ( { model | dnd = dnd, prayers = prayers }
-      , system.commands model.dnd
-      )
+    PrayerListMsg m ->
+      PrayerList.update m model |> mapSecond (Cmd.map PrayerListMsg)
+    PrayerEditMsg m -> (PrayerEdit.update m model, Cmd.none)
+    New -> (model, if maybeExists (\p -> String.isEmpty p.name) model.openPrayer then Cmd.none else Random.generate NewRandomId uuidGenerator)
+    NewRandomId id -> (addPrayer id model, Cmd.none)
+    Load -> (model, Cmd.none)
+    Save -> (model, Cmd.none)
 
 -- VIEW
 
 view : Model -> Html Msg
 view model =
     Element.layout
-      [ Element.inFront (ghostView model.dnd model.prayers)
+      [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model.dnd model.prayers))
       ]
       (
-      row [ width fill, centerY, spacing 30 ]
-              [ prayersPanel model
-              , editPrayer model
-              ]
-              )
+      column []
+      [ row [ spacing 30 ]
+          [ Element.Input.button [] { onPress = Just New, label = Element.text "new"}
+          , Element.Input.button [] { onPress = Just Load, label = Element.text "load"}
+          , Element.Input.button [] { onPress = Just Save, label = Element.text "save"}
+          ]
+      , row [ width fill, centerY, spacing 30 ]
+        [ Element.map PrayerListMsg (PrayerList.view model)
+        , case model.openPrayer of
+            Nothing -> Element.text "No prayer selected"
+            Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
+        ]
+      , codeView model.code
+      ]
+      )
 
-prayersPanel : Model -> Element Msg
-prayersPanel model =
-  column [ alignLeft, padding 30 ]
-  (model.prayers |> List.indexedMap (prayerView model.dnd))
+codeView : Maybe String -> Element msg
+codeView code =
+  case code of
+    Just c ->
+      column []
+        [ qrCodeView c
+        , Element.el [ centerX ] <| Element.text c
+        ]
+    Nothing -> Element.none
 
-prayerItem : Prayer -> Element Msg
-prayerItem p =
-  el
-    [ Background.color (rgb255 240 0 245)
-    , Font.color (rgb255 255 255 255)
-    , Border.rounded 3
-    , padding 30
-    ]
-    (text p.name)
-
-emptyItem : Element Msg
-emptyItem =
-  el
-    [ Background.color (rgb255 70 70 70)
-    , Border.rounded 3
-    , padding 30
-    ]
-    (Element.none)
-
-prayerView : DnDList.Model -> Int -> Prayer -> Element Msg
-prayerView dnd index prayer =
-  case system.info dnd of
-    Just { dragIndex } ->
-      if dragIndex /= index then
-        Element.el
-          (Element.htmlAttribute (Html.Attributes.id prayer.id)
-            :: List.map Element.htmlAttribute (system.dropEvents index prayer.id)
-          )
-          (prayerItem prayer)
-        else
-          Element.el
-            [ Element.htmlAttribute (Html.Attributes.id prayer.id) ]
-            emptyItem
-    Nothing ->
-      Element.el
-        (Element.htmlAttribute (Html.Attributes.id prayer.id)
-          :: onClick (OpenPrayer prayer)
-          :: List.map Element.htmlAttribute (system.dragEvents index prayer.id)
-        )
-        (prayerItem prayer)
-
-ghostView : DnDList.Model -> List Prayer -> Element.Element Msg
-ghostView dnd items =
-  let
-    maybeDragItem : Maybe Prayer
-    maybeDragItem =
-      system.info dnd
-        |> Maybe.andThen (\{ dragIndex } -> items |> List.drop dragIndex |> List.head)
-  in
-  case maybeDragItem of
-    Just item ->
-      Element.el
-        (List.map Element.htmlAttribute (system.ghostStyles dnd))
-        (prayerItem item)
-
-    Nothing ->
-      Element.none
-
-
-editPrayer : Model -> Element Msg
-editPrayer model =  el [] (text model.openPrayer.name)
+qrCodeView : String -> Element msg
+qrCodeView message =
+  QRCode.encode message
+    |> Result.map QRCode.toSvg
+    |> Result.withDefault
+      (Html.text "Error while encoding to QRCode.")
+    |> Element.html
