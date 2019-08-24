@@ -30,3 +30,10 @@ Test / play
 ```
 stack ghci server
 ```
+
+One can connect easily to ws and test it in JS like
+```javascript
+var ws = new WebSocket('ws://localhost:3000/');
+
+ws.onmessage = (event) => console.log('Received: ' + event.data);
+```

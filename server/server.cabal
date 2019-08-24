@@ -27,3 +27,4 @@ executable server
                      , monad-loops
                      , scotty
                      , bytestring
+                     , utf8-string

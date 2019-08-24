@@ -13,11 +13,12 @@ type alias Prayer =
   }
 
 type alias Model =
-  { dnd        : DnDList.Model
-  , prayers    : List Prayer
-  , favorites  : List Prayer
-  , openPrayer : Maybe Prayer
-  , code       : Maybe String
+  { dnd          : DnDList.Model
+  , prayers      : List Prayer
+  , favorites    : List Prayer
+  , openPrayer   : Maybe Prayer
+  , clientId     : Maybe String
+  , appConnected : Bool
   }
 
 getId : Prayer -> String

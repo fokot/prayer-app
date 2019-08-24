@@ -1,6 +1,7 @@
 import Browser
 import Html exposing (Html)
-import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, row, spacing, width)
+import Http
+import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, rgb255, row, spacing, width)
 import DnDList
 import List.Extra exposing (find)
 import Model exposing (Prayer, maybeGet)
@@ -14,6 +15,8 @@ import Tuple exposing (mapSecond)
 import Element.Input
 import Random
 import Uuid exposing (uuidGenerator, Uuid)
+import Time
+import Element.Background as Background
 
 -- MAIN
 
@@ -23,9 +26,11 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions =  PrayerList.subscriptions >> Sub.map PrayerListMsg
+        , subscriptions = \m -> Sub.batch [ (PrayerList.subscriptions >> Sub.map PrayerListMsg) m, statusPolling ]
         }
 
+statusPolling : Sub Msg
+statusPolling = Time.every 1000 (\_ -> Tick)
 
 u : String -> Uuid
 u id = id |> Uuid.fromString |> maybeGet
@@ -43,12 +48,18 @@ initialModel =
   ],
   favorites = [],
   openPrayer = Nothing,
-  code = Just "aaaa"
+  clientId = Nothing,
+  appConnected = False
   }
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( initialModel, Cmd.none )
+  ( initialModel
+  , Http.get
+      { url = "http://localhost:3000/newClientId"
+      , expect = Http.expectString Connect
+      }
+  )
 
 -- UPDATE
 
@@ -59,6 +70,16 @@ type Msg
   | NewRandomId Uuid
   | Load
   | Save
+  | Connect (Result Http.Error String)
+  | AppStatus (Result Http.Error Bool)
+  | Tick
+
+stringToBool : String -> Bool
+stringToBool s =
+  case s of
+    "true" -> True
+    _      -> False
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -73,6 +94,23 @@ update message model =
     NewRandomId id -> (addPrayer id model, Cmd.none)
     Load -> (model, Cmd.none)
     Save -> (model, Cmd.none)
+    Connect clientIdRes ->
+      case clientIdRes of
+        Err _ -> (model, Cmd.none)
+        Ok clientId -> ({ model | clientId = Just clientId }, Cmd.none)
+    Tick -> (model,
+      model.clientId
+      |> Maybe.map (\cid ->
+        Http.get (
+        { url = "http://localhost:3000/" ++ cid ++ "/status"
+        , expect = Http.expectString (Result.map stringToBool >> AppStatus)
+        })
+      )
+      |> Maybe.withDefault Cmd.none)
+    AppStatus res ->
+      case res of
+        Err _ -> ({ model | appConnected = False }, Cmd.none)
+        Ok connected -> ({ model | appConnected = connected }, Cmd.none)
 
 -- VIEW
 
@@ -94,15 +132,15 @@ view model =
             Nothing -> Element.text "No prayer selected"
             Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
         ]
-      , codeView model.code
+      , clientIdView model.clientId model.appConnected
       ]
       )
 
-codeView : Maybe String -> Element msg
-codeView code =
+clientIdView : Maybe String -> Bool -> Element msg
+clientIdView code appConnected =
   case code of
     Just c ->
-      column []
+      column [ Background.color <| if appConnected then rgb255 0 220 0 else rgb255 255 255 255 ]
         [ qrCodeView c
         , Element.el [ centerX ] <| Element.text c
         ]
