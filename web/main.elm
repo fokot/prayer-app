@@ -1,7 +1,8 @@
 import Browser
 import Html exposing (Html)
-import Element exposing (Attribute, Element, row, column, fill, width, spacing, centerY, centerX)
+import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, row, spacing, width)
 import DnDList
+import List.Extra exposing (find)
 import Model exposing (Prayer, maybeGet)
 import PrayerEdit
 import PrayerList
@@ -65,7 +66,10 @@ update message model =
     PrayerListMsg m ->
       PrayerList.update m model |> mapSecond (Cmd.map PrayerListMsg)
     PrayerEditMsg m -> (PrayerEdit.update m model, Cmd.none)
-    New -> (model, if maybeExists (\p -> String.isEmpty p.name) model.openPrayer then Cmd.none else Random.generate NewRandomId uuidGenerator)
+    New ->
+      case find (\p -> String.isEmpty p.name) model.prayers of
+        Just p -> ({model | openPrayer = Just p}, Cmd.none)
+        Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
     Load -> (model, Cmd.none)
     Save -> (model, Cmd.none)
@@ -78,7 +82,7 @@ view model =
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model.dnd model.prayers))
       ]
       (
-      column []
+      column [ height fill ]
       [ row [ spacing 30 ]
           [ Element.Input.button [] { onPress = Just New, label = Element.text "new"}
           , Element.Input.button [] { onPress = Just Load, label = Element.text "load"}

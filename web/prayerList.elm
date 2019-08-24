@@ -1,7 +1,7 @@
 module PrayerList exposing (view, ghostView, update, subscriptions, Msg, system)
 
 import List
-import Element exposing (Attribute, Element, column, el, text, row, alignLeft, alignTop, fill, width, rgb255, spacing, centerY, centerX, padding)
+import Element exposing (Attribute, Element, alignLeft, alignTop, centerX, centerY, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -56,13 +56,13 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, padding 30 ]
+  column [ alignLeft, width <| px 200, spacing 20, scrollbarY ]
   (model.prayers |> List.indexedMap (prayerView model))
 
 prayerItem : Bool -> Prayer -> Element Msg
 prayerItem selected p =
   el
-    [ Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
+    [ (width fill), Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
     , Font.color (rgb255 255 255 255)
     , Border.rounded 3
     , padding 30
@@ -84,17 +84,17 @@ prayerView model index prayer =
     Just { dragIndex } ->
       if dragIndex /= index then
         Element.el
-          (Element.htmlAttribute (Html.Attributes.id (getId prayer))
+          ((width fill) :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
             :: List.map Element.htmlAttribute (system.dropEvents index (getId prayer))
           )
           (prayerItem False prayer)
         else
           Element.el
-            [ Element.htmlAttribute (Html.Attributes.id (getId prayer)) ]
+            [ (width fill) , Element.htmlAttribute (Html.Attributes.id (getId prayer)) ]
             emptyItem
     Nothing ->
       Element.el
-        (Element.htmlAttribute (Html.Attributes.id (getId prayer))
+        ((width fill) :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
           :: onClick (OpenPrayer prayer)
           :: List.map Element.htmlAttribute (system.dragEvents index (getId prayer))
         )
