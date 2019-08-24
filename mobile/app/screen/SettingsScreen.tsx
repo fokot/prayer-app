@@ -1,4 +1,4 @@
-import {Button, Picker, Slider, Switch, View, Text, Modal, FlatList, TouchableOpacity} from "react-native";
+import {Button, Picker, Slider, Switch, View, Text, Modal, FlatList, StyleSheet} from "react-native";
 import React, {useEffect, useState} from "react";
 import {
   toggleDarkMode,
@@ -10,6 +10,8 @@ import {
 } from "../utils/PrayerStore";
 import { Ionicons } from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
+import { BarCodeScanner } from 'expo-barcode-scanner';
+import * as Permissions from 'expo-permissions';
 
 export const SettingsScreen = () => {
   const darkMode = useStore(s => s.settings.darkMode);
@@ -86,20 +88,39 @@ const random4digits = () =>
   (Math.floor(Math.random() * 10000)).toString().padStart(4, "0");
 
 const Sync = () => {
-  useEffect(
-    () => {
-      var ws = new WebSocket('ws://192.168.0.26:8080/');
 
-      ws.onmessage = function(event) {
-        alert('Count is: ' + event.data);
-      };
-      return () => ws.close();
+  const [clientId, setClientId] = useState(null);
+  const [hasCameraPermission, setCameraPermission] = useState(null);
+
+  useEffect(
+    () =>
+    {Permissions.askAsync(Permissions.CAMERA).then(
+        ({ status }) =>
+          setCameraPermission(status === 'granted')
+      )
+      return () => {};
     }
   );
+
+  if (hasCameraPermission === null) {
+    return <Text>Requesting for camera permission</Text>;
+  }
+  if (hasCameraPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
   return (
-    <View>
-      <Text>Syncing...</Text>
-      <Text>{random4digits()}</Text>
+    <View style={{
+      flex: 1,
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
+    }}>
+      {!clientId && <BarCodeScanner
+        onBarCodeScanned={({ type, data }) => {setClientId(data); setClientId(data)}}
+        style={StyleSheet.absoluteFillObject}
+      />}
+      <Text>Syncing...{clientId}</Text>
+      {/*<Text>{random4digits()}</Text>*/}
     </View>
   );
 }
