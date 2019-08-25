@@ -1,4 +1,5 @@
-module Model exposing (Prayer, Model, updatePrayer, emptyPrayer, addPrayer, getId, maybeGet, maybeExists)
+module Model exposing (Prayer, Model, updatePrayer, emptyPrayer, addPrayer, getId, maybeGet, maybeExists, prayerDecoder)
+import Json.Decode as JD exposing (Decoder, field)
 import List
 import DnDList
 import Uuid exposing (Uuid)
@@ -12,6 +13,17 @@ type alias Prayer =
   , favorite : Bool
   }
 
+u : String -> Uuid
+u id = id |> Uuid.fromString |> maybeGet
+
+prayerDecoder : Decoder Prayer
+prayerDecoder =
+  JD.map4 Prayer
+    (JD.map u <| field "id" JD.string)
+    (field "name" JD.string)
+    (field "text" JD.string)
+    (field "favorite" JD.bool)
+
 type alias Model =
   { dnd          : DnDList.Model
   , prayers      : List Prayer
@@ -19,6 +31,7 @@ type alias Model =
   , openPrayer   : Maybe Prayer
   , clientId     : Maybe String
   , appConnected : Bool
+  , errors       : List String
   }
 
 getId : Prayer -> String

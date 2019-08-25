@@ -84,9 +84,6 @@ export const SettingsScreen = () => {
   </View>
 )};
 
-const random4digits = () =>
-  (Math.floor(Math.random() * 10000)).toString().padStart(4, "0");
-
 const Sync = () => {
 
   const [clientId, setClientId] = useState(null);
@@ -109,20 +106,47 @@ const Sync = () => {
     return <Text>No access to camera</Text>;
   }
 
+  if(clientId) {
+    return <Syncing clientId={clientId} />;
+  }
+
   return (
     <View style={{
       flex: 1,
       flexDirection: 'column',
       justifyContent: 'flex-end',
     }}>
-      {!clientId && <BarCodeScanner
+      <BarCodeScanner
         onBarCodeScanned={({ type, data }) => {setClientId(data); setClientId(data)}}
         style={StyleSheet.absoluteFillObject}
-      />}
-      <Text>Syncing...{clientId}</Text>
-      {/*<Text>{random4digits()}</Text>*/}
+      />
     </View>
   );
+}
+
+const Syncing = ({clientId}) => {
+  const prayers = useStore( ({prayers, allPrayerIds, favoritePrayerIds}) =>
+    allPrayerIds.map(id =>
+      ({ ...(prayers[id]),
+        favorite: favoritePrayerIds.includes(id)
+      })
+    )
+  );
+
+  useEffect(
+    () => {
+      const ws = new WebSocket(`ws://192.168.0.26:3000/${clientId}`);
+
+      ws.onmessage = function(event) {
+        ws.send(JSON.stringify(
+          prayers
+        ))
+      };
+      return () => ws.close();
+    }
+  );
+
+  return <Text>Syncing...{clientId}</Text>
 }
 
 const PrayerModal = ({closeModal}) => {

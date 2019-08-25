@@ -67,11 +67,13 @@ scottyApp stateRef = do
       clientId <- Sc.param "clientId"
       response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef (Text.pack "get")
       setApplicationJsonHeader
+      enableCorsHeader
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
     Sc.put "/:clientId" $ do
       clientId <- Sc.param "clientId"
       body <- Encoding.decodeUtf8 <$> LazyByteString.toStrict <$> Sc.body
       response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef body
+      enableCorsHeader
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
     Sc.get "/:clientId/status" $ do
       clientId <- Sc.param "clientId"

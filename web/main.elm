@@ -3,6 +3,7 @@ import Html exposing (Html)
 import Http
 import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, rgb255, row, spacing, width)
 import DnDList
+import Json.Decode as Decode exposing (Decoder)
 import List.Extra exposing (find)
 import Model exposing (Prayer, maybeGet)
 import PrayerEdit
@@ -30,7 +31,7 @@ main =
         }
 
 statusPolling : Sub Msg
-statusPolling = Time.every 1000 (\_ -> Tick)
+statusPolling = Time.every 100000 (\_ -> Tick)
 
 u : String -> Uuid
 u id = id |> Uuid.fromString |> maybeGet
@@ -49,7 +50,8 @@ initialModel =
   favorites = [],
   openPrayer = Nothing,
   clientId = Nothing,
-  appConnected = False
+  appConnected = False,
+  errors = []
   }
 
 init : () -> ( Model, Cmd Msg )
@@ -69,17 +71,22 @@ type Msg
   | New
   | NewRandomId Uuid
   | Load
+  | Loaded (Result Http.Error (List Prayer))
   | Save
   | Connect (Result Http.Error String)
   | AppStatus (Result Http.Error Bool)
   | Tick
 
-stringToBool : String -> Bool
-stringToBool s =
-  case s of
-    "true" -> True
-    _      -> False
+errStr : Http.Error -> String
+errStr e = case e of
+  Http.BadUrl _ -> "BadUrl"
+  Http.Timeout -> "Timeout"
+  Http.NetworkError -> "NetworkError"
+  Http.BadStatus _ -> "BadStatus"
+  Http.BadBody s -> "BadBody: " ++ s
 
+withClientId : Model -> (String -> Cmd Msg) -> Cmd Msg
+withClientId model f = model.clientId |> Maybe.map f |> Maybe.withDefault Cmd.none
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -92,21 +99,25 @@ update message model =
         Just p -> ({model | openPrayer = Just p}, Cmd.none)
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
-    Load -> (model, Cmd.none)
+    Load -> (model, withClientId model (\clientId ->
+      Http.get (
+      { url = "http://localhost:3000/" ++ clientId
+      , expect = Http.expectJson Loaded <| Decode.list Model.prayerDecoder
+      })))
+    Loaded res ->
+      case res of
+       Err e -> ({model | errors = [errStr e]}, Cmd.none)
+       Ok prayers -> ({model | prayers = prayers, favorites = List.filter .favorite prayers, openPrayer = Nothing }, Cmd.none)
     Save -> (model, Cmd.none)
     Connect clientIdRes ->
       case clientIdRes of
         Err _ -> (model, Cmd.none)
         Ok clientId -> ({ model | clientId = Just clientId }, Cmd.none)
-    Tick -> (model,
-      model.clientId
-      |> Maybe.map (\cid ->
-        Http.get (
-        { url = "http://localhost:3000/" ++ cid ++ "/status"
-        , expect = Http.expectString (Result.map stringToBool >> AppStatus)
-        })
-      )
-      |> Maybe.withDefault Cmd.none)
+    Tick -> (model, withClientId model (\clientId ->
+      Http.get (
+      { url = "http://localhost:3000/" ++ clientId ++ "/status"
+      , expect = Http.expectJson AppStatus Decode.bool
+      })))
     AppStatus res ->
       case res of
         Err _ -> ({ model | appConnected = False }, Cmd.none)
@@ -121,7 +132,8 @@ view model =
       ]
       (
       column [ height fill ]
-      [ row [ spacing 30 ]
+      [ column [] <| List.map Element.text model.errors
+      , row [ spacing 30 ]
           [ Element.Input.button [] { onPress = Just New, label = Element.text "new"}
           , Element.Input.button [] { onPress = Just Load, label = Element.text "load"}
           , Element.Input.button [] { onPress = Just Save, label = Element.text "save"}
