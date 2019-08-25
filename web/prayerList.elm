@@ -56,26 +56,34 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, width <| px 200, spacing 20, scrollbarY ]
+  column [ alignLeft, width <| px 200, spacing 5, scrollbarY ]
   (model.prayers |> List.indexedMap (prayerView model))
+
+
+prayerItemAtts : List (Attribute msg)
+prayerItemAtts =
+  [ width fill
+  , height <| px 20
+  , Border.rounded 3
+  , padding 30
+  ]
+
 
 prayerItem : Bool -> Prayer -> Element Msg
 prayerItem selected p =
   el
-    [ (width fill), Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
-    , Font.color (rgb255 255 255 255)
-    , Border.rounded 3
-    , padding 30
-    ]
+    ( Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
+    :: Font.color (rgb255 255 255 255)
+    :: prayerItemAtts
+    )
     (text p.name)
 
 emptyItem : Element Msg
 emptyItem =
   el
-    [ Background.color (rgb255 70 70 70)
-    , Border.rounded 3
-    , padding 30
-    ]
+    ( Background.color (rgb255 70 70 70)
+    :: prayerItemAtts
+    )
     (Element.none)
 
 prayerView : Model -> Int -> Prayer -> Element Msg

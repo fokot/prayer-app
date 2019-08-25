@@ -1,11 +1,15 @@
 import Browser
+import Element.Border exposing (rounded)
+import Element.Font as Font
 import Html exposing (Html)
+import Html.Attributes
 import Http
-import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, rgb255, row, spacing, width)
+import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, padding, px, rgb255, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import List.Extra exposing (find)
-import Model exposing (Prayer, maybeGet)
+import Model exposing (Prayer, maybeGet, prayerEncode)
 import PrayerEdit
 import PrayerList
 import Platform.Sub as Sub
@@ -18,6 +22,7 @@ import Random
 import Uuid exposing (uuidGenerator, Uuid)
 import Time
 import Element.Background as Background
+import Element.Border as Border
 
 -- MAIN
 
@@ -31,7 +36,7 @@ main =
         }
 
 statusPolling : Sub Msg
-statusPolling = Time.every 100000 (\_ -> Tick)
+statusPolling = Time.every 1000 (\_ -> Tick)
 
 u : String -> Uuid
 u id = id |> Uuid.fromString |> maybeGet
@@ -76,6 +81,10 @@ type Msg
   | Connect (Result Http.Error String)
   | AppStatus (Result Http.Error Bool)
   | Tick
+  | Noop
+
+noop : a -> Msg
+noop _ = Noop
 
 errStr : Http.Error -> String
 errStr e = case e of
@@ -87,6 +96,26 @@ errStr e = case e of
 
 withClientId : Model -> (String -> Cmd Msg) -> Cmd Msg
 withClientId model f = model.clientId |> Maybe.map f |> Maybe.withDefault Cmd.none
+
+postJson
+  : { url : String
+    , body : Encode.Value
+    , expect : Http.Expect msg
+    }
+  -> Cmd msg
+postJson r =
+  Http.request
+    { method = "POST"
+    , headers =
+      [ Http.header "Access-Control-Allow-Headers" "x-requested-with"
+      ]
+    , url = r.url
+    , body = Http.jsonBody r.body
+    , expect = r.expect
+    , timeout = Nothing
+    , tracker = Nothing
+    }
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
@@ -100,15 +129,21 @@ update message model =
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
     Load -> (model, withClientId model (\clientId ->
-      Http.get (
+      postJson (
       { url = "http://localhost:3000/" ++ clientId
       , expect = Http.expectJson Loaded <| Decode.list Model.prayerDecoder
+      , body =  Encode.string "get"
       })))
     Loaded res ->
       case res of
        Err e -> ({model | errors = [errStr e]}, Cmd.none)
        Ok prayers -> ({model | prayers = prayers, favorites = List.filter .favorite prayers, openPrayer = Nothing }, Cmd.none)
-    Save -> (model, Cmd.none)
+    Save -> (model, withClientId model (\clientId ->
+      postJson (
+      { url = "http://localhost:3000/" ++ clientId
+      , expect = Http.expectWhatever noop
+      , body = Encode.list prayerEncode model.prayers
+      })))
     Connect clientIdRes ->
       case clientIdRes of
         Err _ -> (model, Cmd.none)
@@ -122,8 +157,20 @@ update message model =
       case res of
         Err _ -> ({ model | appConnected = False }, Cmd.none)
         Ok connected -> ({ model | appConnected = connected }, Cmd.none)
+    Noop -> (model, Cmd.none)
 
 -- VIEW
+
+button attrs a = Element.Input.button
+  ( (width <| px 160)
+  :: (height <| px 120)
+  :: rounded 10
+  :: padding 10
+  :: Border.solid
+  :: (Border.color <| rgb255 220 220 220)
+  :: Border.width 2
+  :: attrs
+  ) a
 
 view : Model -> Html Msg
 view model =
@@ -133,10 +180,17 @@ view model =
       (
       column [ height fill ]
       [ column [] <| List.map Element.text model.errors
-      , row [ spacing 30 ]
-          [ Element.Input.button [] { onPress = Just New, label = Element.text "new"}
-          , Element.Input.button [] { onPress = Just Load, label = Element.text "load"}
-          , Element.Input.button [] { onPress = Just Save, label = Element.text "save"}
+      , row [ spacing 5 ]
+          [ button [Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
+          , button [ Background.color <| rgb255 255 255 255]
+            { onPress = Just Load
+            , label = Element.html <| Html.img [ Html.Attributes.src "/img/load.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+            }
+          , button []
+            { onPress = Just Save
+            , label = Element.html <| Html.img [ Html.Attributes.src "/img/save.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+            }
+          , clientIdView model.clientId model.appConnected
           ]
       , row [ width fill, centerY, spacing 30 ]
         [ Element.map PrayerListMsg (PrayerList.view model)
@@ -144,7 +198,6 @@ view model =
             Nothing -> Element.text "No prayer selected"
             Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
         ]
-      , clientIdView model.clientId model.appConnected
       ]
       )
 
@@ -152,10 +205,8 @@ clientIdView : Maybe String -> Bool -> Element msg
 clientIdView code appConnected =
   case code of
     Just c ->
-      column [ Background.color <| if appConnected then rgb255 0 220 0 else rgb255 255 255 255 ]
-        [ qrCodeView c
-        , Element.el [ centerX ] <| Element.text c
-        ]
+      Element.el [ Background.color <| if appConnected then rgb255 0 220 0 else rgb255 255 255 255 ]
+        (qrCodeView c)
     Nothing -> Element.none
 
 qrCodeView : String -> Element msg

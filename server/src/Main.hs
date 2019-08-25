@@ -62,24 +62,28 @@ scottyApp stateRef = do
       clientId <- Sc.liftAndCatchIO $ nextId stateRef
       setApplicationJsonHeader
       enableCorsHeader
+      Sc.setHeader "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS"
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 $ Text.pack clientId
-    Sc.get "/:clientId" $ do
-      clientId <- Sc.param "clientId"
-      response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef (Text.pack "get")
-      setApplicationJsonHeader
+    Sc.options "/:clientId" $ do
       enableCorsHeader
-      Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
-    Sc.put "/:clientId" $ do
+      Sc.setHeader "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS"
+    Sc.get "/:clientId" $ do
+      enableCorsHeader
+      Sc.setHeader "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS"
+    Sc.post "/:clientId" $ do
       clientId <- Sc.param "clientId"
       body <- Encoding.decodeUtf8 <$> LazyByteString.toStrict <$> Sc.body
       response <- Sc.liftAndCatchIO $ sendToClientWithResponse (LazyText.unpack clientId) stateRef body
+      setApplicationJsonHeader
       enableCorsHeader
+      Sc.setHeader "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS"
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 response
     Sc.get "/:clientId/status" $ do
       clientId <- Sc.param "clientId"
       status <- Sc.liftAndCatchIO $ clientStatus clientId stateRef
       setApplicationJsonHeader
       enableCorsHeader
+      Sc.setHeader "Access-Control-Allow-Methods" "GET, POST, PUT, DELETE, OPTIONS"
       Sc.raw $ LazyByteString.fromStrict $ Encoding.encodeUtf8 $ Text.pack (encodeBool status)
 
 
@@ -97,7 +101,6 @@ fourDigits = Printf.printf "%04d"
 connectClient :: WS.Connection -> Concurrent.MVar State -> ClientId -> IO (Concurrent.MVar Message)
 connectClient conn stateRef clientId = Concurrent.modifyMVar stateRef $ \state -> do
   messageRef <- Concurrent.newEmptyMVar
-  WS.sendTextData conn (Text.pack clientId)
   return (State ((clientId, conn, messageRef) : clients state) (clientIds state), messageRef)
 
 withoutClient :: ClientId -> State -> State

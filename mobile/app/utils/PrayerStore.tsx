@@ -182,26 +182,32 @@ export const addCdnPrayers = async (fileName) => {
   await dbSetAllPrayerIds(store.allPrayerIds);
 };
 
-export const replaceCdnPrayers = async (fileName) => {
-  const prayers = await loadCdnPrayers(fileName);
-  const toPair = (p) => {
-    const id = uuid();
-    return [id, ({...p, id})];
-  };
-  const pairs = prayers.map(toPair);
+const replacePrayers = async (prayers, favoritePrayerIds) => {
   const idsToDelete = currentStore().allPrayerIds;
+  const pairs = prayers.map(p => [p.id, p]);
   const store = updateStore(
     s => ({
       ...s,
       prayers: fromPairs(pairs),
-      allPrayerIds: pairs.map(p => p[0]),
-      favoritePrayerIds: [],
+      allPrayerIds: prayers.map(p => p.id),
+      favoritePrayerIds,
     })
   );
   await dbDeletePrayers(idsToDelete);
   await dbSavePrayers(pairs);
   await dbSetAllPrayerIds(store.allPrayerIds);
+  await dbSetFavoritePrayerIds(favoritePrayerIds);
 };
 
+export const replaceCdnPrayers = async (fileName) => {
+  const prayersFromCdn = await loadCdnPrayers(fileName);
+  const prayers = prayersFromCdn.map(p => ({...p, id: uuid()}));
+  await replacePrayers(prayers, []);
+};
 
+export const replaceFromWeb = async (prayersFromWeb) => {
+  const prayers = prayersFromWeb.map(({favorite, ...p}) => p);
+  const favoritePrayerIds = prayers.filter(p => p.favorite).map(p => p.id);
+  await replacePrayers(prayers, favoritePrayerIds);
+};
 

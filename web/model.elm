@@ -1,5 +1,7 @@
-module Model exposing (Prayer, Model, updatePrayer, emptyPrayer, addPrayer, getId, maybeGet, maybeExists, prayerDecoder)
+module Model exposing (..)
+
 import Json.Decode as JD exposing (Decoder, field)
+import Json.Encode as Encode
 import List
 import DnDList
 import Uuid exposing (Uuid)
@@ -23,6 +25,14 @@ prayerDecoder =
     (field "name" JD.string)
     (field "text" JD.string)
     (field "favorite" JD.bool)
+
+prayerEncode : Prayer -> Encode.Value
+prayerEncode p = Encode.object
+  [ ( "id", Encode.string <| Uuid.toString p.id )
+  , ( "name", Encode.string p.name )
+  , ( "text", Encode.string p.text )
+  , ( "favorite", Encode.bool p.favorite )
+  ]
 
 type alias Model =
   { dnd          : DnDList.Model

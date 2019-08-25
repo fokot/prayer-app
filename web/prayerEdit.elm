@@ -31,14 +31,14 @@ view : Prayer -> Element Msg
 view prayer =
   column [ alignTop ]
     [ Input.text
-        [ Font.size 64, Font.bold ]
+        [ Font.size 32, Font.bold ]
           { onChange = ChangeName
           , text = prayer.name
           , placeholder = Just (Input.placeholder [] <| text "Name")
           , label = Input.labelHidden "name"
           }
     , Input.multiline
-        [ Font.size 64, Font.bold ]
+        [ Font.size 16, Font.bold ]
           { onChange = ChangeText
           , text = prayer.text
           , placeholder = Just (Input.placeholder [] <| text "Text")

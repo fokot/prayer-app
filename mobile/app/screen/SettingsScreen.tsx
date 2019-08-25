@@ -6,7 +6,7 @@ import {
   useBackgroundColor,
   toggleFavorite,
   getCdnPrayers,
-  addCdnPrayers, replaceCdnPrayers
+  addCdnPrayers, replaceCdnPrayers, replaceFromWeb
 } from "../utils/PrayerStore";
 import { Ionicons } from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
@@ -79,12 +79,12 @@ export const SettingsScreen = () => {
       transparent={false}
       visible={showSync}
       onRequestClose={() => setShowSync(false)}>
-      <Sync />
+      <Sync closeSync={() => setShowSync(false)}/>
     </Modal>
   </View>
 )};
 
-const Sync = () => {
+const Sync = ({closeSync}) => {
 
   const [clientId, setClientId] = useState(null);
   const [hasCameraPermission, setCameraPermission] = useState(null);
@@ -107,7 +107,7 @@ const Sync = () => {
   }
 
   if(clientId) {
-    return <Syncing clientId={clientId} />;
+    return <Syncing clientId={clientId} closeSync={closeSync} />;
   }
 
   return (
@@ -117,6 +117,7 @@ const Sync = () => {
       justifyContent: 'flex-end',
     }}>
       <BarCodeScanner
+        barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
         onBarCodeScanned={({ type, data }) => {setClientId(data); setClientId(data)}}
         style={StyleSheet.absoluteFillObject}
       />
@@ -124,7 +125,7 @@ const Sync = () => {
   );
 }
 
-const Syncing = ({clientId}) => {
+const Syncing = ({clientId, closeSync}) => {
   const prayers = useStore( ({prayers, allPrayerIds, favoritePrayerIds}) =>
     allPrayerIds.map(id =>
       ({ ...(prayers[id]),
@@ -138,10 +139,20 @@ const Syncing = ({clientId}) => {
       const ws = new WebSocket(`ws://192.168.0.26:3000/${clientId}`);
 
       ws.onmessage = function(event) {
-        ws.send(JSON.stringify(
-          prayers
-        ))
+
+        const data = JSON.parse(event.data);
+
+        if(data === 'get') {
+          ws.send(JSON.stringify(
+            prayers
+          ))
+        }
+        else if(Array.isArray(data)){
+          replaceFromWeb(data).then(ws.send("ok"));
+        }
       };
+
+      ws.onclose = closeSync;
       return () => ws.close();
     }
   );
