@@ -25,6 +25,5 @@ executable server
                      , safe
                      , random
                      , monad-loops
-                     , scotty
                      , bytestring
                      , utf8-string

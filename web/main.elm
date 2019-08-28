@@ -1,3 +1,5 @@
+port module Main exposing (..)
+
 import Browser
 import Element.Border exposing (rounded)
 import Element.Font as Font
@@ -24,7 +26,11 @@ import Time
 import Element.Background as Background
 import Element.Border as Border
 
+
 -- MAIN
+
+port wsSend : Encode.Value -> Cmd msg
+port wsReceive : (Encode.Value -> msg) -> Sub msg
 
 main : Program () Model Msg
 main =
@@ -32,11 +38,25 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \m -> Sub.batch [ (PrayerList.subscriptions >> Sub.map PrayerListMsg) m, statusPolling ]
+        , subscriptions = \m -> Sub.batch
+          [ (PrayerList.subscriptions >> Sub.map PrayerListMsg) m
+          , statusPolling
+          , wsReceive convertWsToMsg
+          ]
         }
 
+
 statusPolling : Sub Msg
-statusPolling = Time.every 1000 (\_ -> Tick)
+statusPolling = Time.every 100000 (\_ -> Tick)
+
+
+convertWsToMsg : Encode.Value -> Msg
+convertWsToMsg v =
+  let res = Decode.decodeValue incomingMsgDecoder v
+  in
+    case res of
+      Err _ -> Noop
+      Ok m -> WsIncoming m
 
 u : String -> Uuid
 u id = id |> Uuid.fromString |> maybeGet
@@ -82,6 +102,27 @@ type Msg
   | AppStatus (Result Http.Error Bool)
   | Tick
   | Noop
+  | WsIncoming IncomingMsg
+
+type IncomingMsg = WsClientId String | WsPrayers (List Prayer) | WsClosed
+
+incomingMsgDecoder : Decoder IncomingMsg
+incomingMsgDecoder = Decode.oneOf [ wsClientIdDecoder, wsPrayersDecoder, wsClosedDecoder ]
+
+wsClientIdDecoder : Decoder IncomingMsg
+wsClientIdDecoder = Decode.field "id" Decode.string |> Decode.map WsClientId
+
+wsPrayersDecoder : Decoder IncomingMsg
+wsPrayersDecoder = Decode.list Model.prayerDecoder |> Decode.map WsPrayers
+
+wsClosedDecoder : Decoder IncomingMsg
+wsClosedDecoder =
+  Decode.string
+  |> Decode.andThen (\s ->
+    if s == "closed"
+    then Decode.succeed WsClosed
+    else Decode.fail <| "unknown message: " ++ s
+  )
 
 noop : a -> Msg
 noop _ = Noop
@@ -128,12 +169,7 @@ update message model =
         Just p -> ({model | openPrayer = Just p}, Cmd.none)
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
-    Load -> (model, withClientId model (\clientId ->
-      postJson (
-      { url = "http://localhost:3000/" ++ clientId
-      , expect = Http.expectJson Loaded <| Decode.list Model.prayerDecoder
-      , body =  Encode.string "get"
-      })))
+    Load -> (model, wsSend <| Encode.string "load")
     Loaded res ->
       case res of
        Err e -> ({model | errors = [errStr e]}, Cmd.none)
@@ -158,6 +194,15 @@ update message model =
         Err _ -> ({ model | appConnected = False }, Cmd.none)
         Ok connected -> ({ model | appConnected = connected }, Cmd.none)
     Noop -> (model, Cmd.none)
+    WsIncoming (WsClientId clientId) -> ({ model | clientId = Just clientId }, Cmd.none)
+    WsIncoming WsClosed -> ({ model | clientId = Nothing }, Cmd.none)
+    WsIncoming (WsPrayers prayers)  -> (
+      { model | prayers = prayers
+      , favorites = List.filter .favorite prayers
+      , openPrayer = Nothing
+      }
+      , Cmd.none)
+
 
 -- VIEW
 
