@@ -5,7 +5,6 @@ import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import Http
 import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, padding, px, rgb255, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
@@ -16,21 +15,22 @@ import PrayerEdit
 import PrayerList
 import Platform.Sub as Sub
 import Platform.Cmd as Cmd
-import Model exposing (Model, addPrayer, maybeExists)
+import Model exposing (Model, addPrayer)
+import Model exposing (Model, addPrayer)
 import QRCode
 import Tuple exposing (mapSecond)
 import Element.Input
 import Random
 import Uuid exposing (uuidGenerator, Uuid)
-import Time
 import Element.Background as Background
 import Element.Border as Border
 
 
 -- MAIN
 
-port wsSend : Encode.Value -> Cmd msg
+port wsSend    : Encode.Value -> Cmd msg
 port wsReceive : (Encode.Value -> msg) -> Sub msg
+port errorLog  : String -> Cmd msg
 
 main : Program () Model Msg
 main =
@@ -40,22 +40,16 @@ main =
         , update = update
         , subscriptions = \m -> Sub.batch
           [ (PrayerList.subscriptions >> Sub.map PrayerListMsg) m
-          , statusPolling
           , wsReceive convertWsToMsg
           ]
         }
-
-
-statusPolling : Sub Msg
-statusPolling = Time.every 100000 (\_ -> Tick)
-
 
 convertWsToMsg : Encode.Value -> Msg
 convertWsToMsg v =
   let res = Decode.decodeValue incomingMsgDecoder v
   in
     case res of
-      Err _ -> Noop
+      Err e -> Error <| "unknown ws message: " ++ Decode.errorToString e
       Ok m -> WsIncoming m
 
 u : String -> Uuid
@@ -80,13 +74,7 @@ initialModel =
   }
 
 init : () -> ( Model, Cmd Msg )
-init _ =
-  ( initialModel
-  , Http.get
-      { url = "http://localhost:3000/newClientId"
-      , expect = Http.expectString Connect
-      }
-  )
+init _ = ( initialModel, Cmd.none )
 
 -- UPDATE
 
@@ -96,13 +84,9 @@ type Msg
   | New
   | NewRandomId Uuid
   | Load
-  | Loaded (Result Http.Error (List Prayer))
   | Save
-  | Connect (Result Http.Error String)
-  | AppStatus (Result Http.Error Bool)
-  | Tick
-  | Noop
   | WsIncoming IncomingMsg
+  | Error String
 
 type IncomingMsg = WsClientId String | WsPrayers (List Prayer) | WsClosed
 
@@ -124,40 +108,6 @@ wsClosedDecoder =
     else Decode.fail <| "unknown message: " ++ s
   )
 
-noop : a -> Msg
-noop _ = Noop
-
-errStr : Http.Error -> String
-errStr e = case e of
-  Http.BadUrl _ -> "BadUrl"
-  Http.Timeout -> "Timeout"
-  Http.NetworkError -> "NetworkError"
-  Http.BadStatus _ -> "BadStatus"
-  Http.BadBody s -> "BadBody: " ++ s
-
-withClientId : Model -> (String -> Cmd Msg) -> Cmd Msg
-withClientId model f = model.clientId |> Maybe.map f |> Maybe.withDefault Cmd.none
-
-postJson
-  : { url : String
-    , body : Encode.Value
-    , expect : Http.Expect msg
-    }
-  -> Cmd msg
-postJson r =
-  Http.request
-    { method = "POST"
-    , headers =
-      [ Http.header "Access-Control-Allow-Headers" "x-requested-with"
-      ]
-    , url = r.url
-    , body = Http.jsonBody r.body
-    , expect = r.expect
-    , timeout = Nothing
-    , tracker = Nothing
-    }
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
@@ -170,30 +120,7 @@ update message model =
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
     Load -> (model, wsSend <| Encode.string "load")
-    Loaded res ->
-      case res of
-       Err e -> ({model | errors = [errStr e]}, Cmd.none)
-       Ok prayers -> ({model | prayers = prayers, favorites = List.filter .favorite prayers, openPrayer = Nothing }, Cmd.none)
-    Save -> (model, withClientId model (\clientId ->
-      postJson (
-      { url = "http://localhost:3000/" ++ clientId
-      , expect = Http.expectWhatever noop
-      , body = Encode.list prayerEncode model.prayers
-      })))
-    Connect clientIdRes ->
-      case clientIdRes of
-        Err _ -> (model, Cmd.none)
-        Ok clientId -> ({ model | clientId = Just clientId }, Cmd.none)
-    Tick -> (model, withClientId model (\clientId ->
-      Http.get (
-      { url = "http://localhost:3000/" ++ clientId ++ "/status"
-      , expect = Http.expectJson AppStatus Decode.bool
-      })))
-    AppStatus res ->
-      case res of
-        Err _ -> ({ model | appConnected = False }, Cmd.none)
-        Ok connected -> ({ model | appConnected = connected }, Cmd.none)
-    Noop -> (model, Cmd.none)
+    Save -> (model, wsSend <| Encode.list prayerEncode model.prayers)
     WsIncoming (WsClientId clientId) -> ({ model | clientId = Just clientId }, Cmd.none)
     WsIncoming WsClosed -> ({ model | clientId = Nothing }, Cmd.none)
     WsIncoming (WsPrayers prayers)  -> (
@@ -202,7 +129,7 @@ update message model =
       , openPrayer = Nothing
       }
       , Cmd.none)
-
+    Error e -> (model, errorLog e)
 
 -- VIEW
 

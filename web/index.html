@@ -22,6 +22,7 @@
   app.ports.wsSend.subscribe(data => ws.send(JSON.stringify(data)));
   ws.onmessage = ({data}) => app.ports.wsReceive.send(JSON.parse(data));
   ws.onclose = () => app.ports.wsReceive.send("closed");
+  app.ports.errorLog.subscribe(data => console.error(data));
 </script>
 </body>
 </html>
