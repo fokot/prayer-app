@@ -19,7 +19,7 @@ Web is connected with with `web` path like
 ```
 ws://localhost:3000/web
 ```
-and it return the code e.g.
+and it returns the code (`clientId`) e.g.
 ```
 {"id":"5777"}
 ```
@@ -28,8 +28,10 @@ with which we can connect single client e.g.
 ws://localhost:3000/5777
 ```
 
-Request with web path are always accepted requests with other path are accepted only
-if there is such web app connected.
+Request with `web` as path are always accepted and new `clientId` is returned. 
+ 
+Requests with other paths are accepted only if there is websocket with such `clientId` connected.
+Only single client can be connected. All subsequent tries are rejected.
 
 Install dependencies
 ```
