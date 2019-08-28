@@ -1,16 +1,18 @@
-import {Button, Picker, Slider, Switch, View, Text, Modal, FlatList, StyleSheet} from "react-native";
+import {Button, FlatList, Modal, Picker, Slider, StyleSheet, Switch, Text, View} from "react-native";
 import React, {useEffect, useState} from "react";
 import {
-  toggleDarkMode,
-  useStore,
-  useBackgroundColor,
-  toggleFavorite,
+  addCdnPrayers,
+  currentStore,
   getCdnPrayers,
-  addCdnPrayers, replaceCdnPrayers, replaceFromWeb
+  replaceCdnPrayers,
+  replaceFromWeb,
+  toggleDarkMode,
+  useBackgroundColor,
+  useStore
 } from "../utils/PrayerStore";
-import { Ionicons } from '@expo/vector-icons';
+import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 
 export const SettingsScreen = () => {
@@ -20,69 +22,70 @@ export const SettingsScreen = () => {
   const [showSync, setShowSync] = useState(false);
   const closeModal = () => setShowPrayersPicker(false);
   return (
-  <View
-    style={{
-      backgroundColor: backgroundColor,
-    }}
-  >
-    <View>
-      <Text>Language</Text>
-      <Picker
-        selectedValue={"English"}
-        style={{height: 50, width: 100}}
-        onValueChange={(itemValue, itemIndex) =>
-          alert({language: itemValue})
-        }>
-        <Picker.Item label="English" value="English" />
-        <Picker.Item label="Slovak" value="Slovak" />
-      </Picker>
-    </View>
-    <View>
-      <Text>Dark mode</Text>
-      <Switch value={darkMode} onValueChange={toggleDarkMode}/>
-    </View>
-    <View>
-      <Text>Text size</Text>
-      <Slider value={5} minimumValue={3} maximumValue={30}/>
-    </View>
     <View
       style={{
-        padding: 16
+        backgroundColor: backgroundColor,
       }}
     >
-      <Button
-        onPress={() => setShowPrayersPicker(true)}
-        title="Load prayers"
-        color="#841584"
-      />
+      <View>
+        <Text>Language</Text>
+        <Picker
+          selectedValue={"English"}
+          style={{height: 50, width: 100}}
+          onValueChange={(itemValue, itemIndex) =>
+            alert({language: itemValue})
+          }>
+          <Picker.Item label="English" value="English"/>
+          <Picker.Item label="Slovak" value="Slovak"/>
+        </Picker>
+      </View>
+      <View>
+        <Text>Dark mode</Text>
+        <Switch value={darkMode} onValueChange={toggleDarkMode}/>
+      </View>
+      <View>
+        <Text>Text size</Text>
+        <Slider value={5} minimumValue={3} maximumValue={30}/>
+      </View>
+      <View
+        style={{
+          padding: 16
+        }}
+      >
+        <Button
+          onPress={() => setShowPrayersPicker(true)}
+          title="Load prayers"
+          color="#841584"
+        />
+      </View>
+      <View
+        style={{
+          padding: 16
+        }}
+      >
+        <Button
+          onPress={() => setShowSync(true)}
+          title="Edit in browser"
+          color="#841584"
+        />
+      </View>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showPrayersPicker}
+        onRequestClose={closeModal}>
+        <PrayerModal closeModal={closeModal}/>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showSync}
+        onRequestClose={() => setShowSync(false)}>
+        <Sync closeSync={() => setShowSync(false)}/>
+      </Modal>
     </View>
-    <View
-      style={{
-        padding: 16
-      }}
-    >
-      <Button
-        onPress={() => setShowSync(true)}
-        title="Edit in browser"
-        color="#841584"
-      />
-    </View>
-    <Modal
-      animationType="slide"
-      transparent={false}
-      visible={showPrayersPicker}
-      onRequestClose={closeModal}>
-      <PrayerModal closeModal={closeModal}/>
-    </Modal>
-    <Modal
-      animationType="slide"
-      transparent={false}
-      visible={showSync}
-      onRequestClose={() => setShowSync(false)}>
-      <Sync closeSync={() => setShowSync(false)}/>
-    </Modal>
-  </View>
-)};
+  )
+};
 
 const Sync = ({closeSync}) => {
 
@@ -90,12 +93,13 @@ const Sync = ({closeSync}) => {
   const [hasCameraPermission, setCameraPermission] = useState(null);
 
   useEffect(
-    () =>
-    {Permissions.askAsync(Permissions.CAMERA).then(
-        ({ status }) =>
+    () => {
+      Permissions.askAsync(Permissions.CAMERA).then(
+        ({status}) =>
           setCameraPermission(status === 'granted')
       )
-      return () => {};
+      return () => {
+      };
     }
   );
 
@@ -106,8 +110,8 @@ const Sync = ({closeSync}) => {
     return <Text>No access to camera</Text>;
   }
 
-  if(clientId) {
-    return <Syncing clientId={clientId} closeSync={closeSync} />;
+  if (clientId) {
+    return <Syncing clientId={clientId} closeSync={closeSync}/>;
   }
 
   return (
@@ -118,7 +122,10 @@ const Sync = ({closeSync}) => {
     }}>
       <BarCodeScanner
         barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-        onBarCodeScanned={({ type, data }) => {setClientId(data); setClientId(data)}}
+        onBarCodeScanned={({type, data}) => {
+          setClientId(data);
+          setClientId(data)
+        }}
         style={StyleSheet.absoluteFillObject}
       />
     </View>
@@ -126,29 +133,28 @@ const Sync = ({closeSync}) => {
 }
 
 const Syncing = ({clientId, closeSync}) => {
-  const prayers = useStore( ({prayers, allPrayerIds, favoritePrayerIds}) =>
-    allPrayerIds.map(id =>
-      ({ ...(prayers[id]),
-        favorite: favoritePrayerIds.includes(id)
-      })
-    )
-  );
-
   useEffect(
     () => {
       const ws = new WebSocket(`ws://192.168.0.26:3000/${clientId}`);
 
-      ws.onmessage = function(event) {
+      ws.onmessage = function (event) {
 
         const data = JSON.parse(event.data);
 
-        if(data === 'get') {
+        if (data === 'load') {
+          const {prayers, allPrayerIds, favoritePrayerIds} = currentStore();
+          const prayersToSend = allPrayerIds.map(id =>
+            ({
+              ...(prayers[id]),
+              favorite: favoritePrayerIds.includes(id)
+            })
+          );
+
           ws.send(JSON.stringify(
-            prayers
+            prayersToSend
           ))
-        }
-        else if(Array.isArray(data)){
-          replaceFromWeb(data).then(ws.send("ok"));
+        } else if (Array.isArray(data)) {
+          replaceFromWeb(data);
         }
       };
 
@@ -165,30 +171,31 @@ const PrayerModal = ({closeModal}) => {
   useEffect(
     () => {
       getCdnPrayers().then(setPrayers);
-      return () => {};
+      return () => {
+      };
     }, []
   );
   const [selectedPrayer, setSelectedPrayer] = useState(null);
   return (
-      <View style={{margin: 22}}>
-        {selectedPrayer ?
+    <View style={{margin: 22}}>
+      {selectedPrayer ?
         <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
-          <View>
-            <Ionicons name="md-close"
-                      onPress={closeModal}
-                      size={32} color="green" />
-            {prayers.length < 1 ?
-              <Text>Loading...</Text> :
-              <FlatList
-                data={prayers}
-                renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)} />}
-                keyExtractor={(item, index) => index.toString()}
-                ItemSeparatorComponent={RenderSeparator}
-              />
-            }
-          </View>
-        }
-      </View>
+        <View>
+          <Ionicons name="md-close"
+                    onPress={closeModal}
+                    size={32} color="green"/>
+          {prayers.length < 1 ?
+            <Text>Loading...</Text> :
+            <FlatList
+              data={prayers}
+              renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)}/>}
+              keyExtractor={(item, index) => index.toString()}
+              ItemSeparatorComponent={RenderSeparator}
+            />
+          }
+        </View>
+      }
+    </View>
   );
 }
 
@@ -200,7 +207,7 @@ const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
     fontSize: 24,
     textAlign: 'center',
   }}
-  onPress={selectPrayer}
+        onPress={selectPrayer}
   >{name}</Text>
 );
 
@@ -208,7 +215,7 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
   <View>
     <Ionicons name="md-close"
               onPress={closeModal}
-              size={32} color="green" />
+              size={32} color="green"/>
     <Text
       style={{
         padding: 16,

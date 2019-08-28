@@ -88,7 +88,7 @@ type Msg
   | WsIncoming IncomingMsg
   | Error String
 
-type IncomingMsg = WsClientId String | WsPrayers (List Prayer) | WsClosed
+type IncomingMsg = WsClientId String | WsPrayers (List Prayer) | WsClosed | WsTunnelOpen
 
 incomingMsgDecoder : Decoder IncomingMsg
 incomingMsgDecoder = Decode.oneOf [ wsClientIdDecoder, wsPrayersDecoder, wsClosedDecoder ]
@@ -103,9 +103,10 @@ wsClosedDecoder : Decoder IncomingMsg
 wsClosedDecoder =
   Decode.string
   |> Decode.andThen (\s ->
-    if s == "closed"
-    then Decode.succeed WsClosed
-    else Decode.fail <| "unknown message: " ++ s
+    case s of
+      "closed" -> Decode.succeed WsClosed
+      "tunnel-open" -> Decode.succeed WsTunnelOpen
+      _        -> Decode.fail <| "unknown message: " ++ s
   )
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -120,9 +121,13 @@ update message model =
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
     Load -> (model, wsSend <| Encode.string "load")
-    Save -> (model, wsSend <| Encode.list prayerEncode model.prayers)
+    Save ->
+      if List.any (\p -> p.name == "") model.prayers
+      then ({model | errors = ["Empty prayer name"]}, Cmd.none)
+      else (model, wsSend <| Encode.list prayerEncode model.prayers)
     WsIncoming (WsClientId clientId) -> ({ model | clientId = Just clientId }, Cmd.none)
-    WsIncoming WsClosed -> ({ model | clientId = Nothing }, Cmd.none)
+    WsIncoming WsClosed -> ({ model | clientId = Nothing, appConnected = False }, Cmd.none)
+    WsIncoming WsTunnelOpen -> ({ model | appConnected = True }, Cmd.none)
     WsIncoming (WsPrayers prayers)  -> (
       { model | prayers = prayers
       , favorites = List.filter .favorite prayers

@@ -67,7 +67,7 @@ const initialStore: StoreType = {
 
 // create store
 const { updateStore, useStore, currentStore } = createStore(initialStore);
-export { useStore };
+export { useStore, currentStore };
 
 const readAllData = async (): Promise<StoreType> => {
   const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || {darkMode: false};

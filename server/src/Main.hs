@@ -96,7 +96,7 @@ connectApp connApp stateRef tunnel =
         newTunnel =  (clientId, connWeb, Just connApp)
         newState  = foldl (\acc a -> (if first a == clientId then newTunnel else a) : acc ) [] state
     in
-    pure newState
+    WS.sendTextData connWeb (BSU.fromString "\"tunnel-open\"") $> newState
   )
 
 receiveText :: WS.Connection -> IO Text.Text
