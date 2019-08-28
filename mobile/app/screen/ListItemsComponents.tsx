@@ -24,6 +24,7 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
         justifyContent: 'center',
         padding: 16,
       }}
+      onPress={() => navigate('Prayer', {prayerId: item.id})}
       onLongPress={move}
       onPressOut={moveEnd}
     >
@@ -32,7 +33,6 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
         color: 'black',
         fontSize: 16,
       }}
-            onPress={() => navigate('Prayer', {prayerId: item.id})}
       >{item.name}</Text>
       <Ionicons name={item.favorite ? "md-star" : "md-star-outline"}
                 onPress={() => toggleFavorite(item.id)}
