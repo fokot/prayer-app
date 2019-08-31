@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
@@ -34,7 +35,7 @@ byClientId clientId (tid, _, _) = clientId == tid
 
 main :: IO ()
 main = do
-  state <- Concurrent.newMVar $ []
+  state <- Concurrent.newMVar []
   Warp.run 3000 $ WS.websocketsOr
     WS.defaultConnectionOptions
     (wsApp state)
@@ -44,7 +45,7 @@ httpApp :: Wai.Application
 httpApp _ respond = respond $ Wai.responseLBS Http.status400 [] "Not a websocket request"
 
 nextId :: Concurrent.MVar State -> IO ClientId
-nextId s = do
+nextId s =
   Concurrent.readMVar s >>= \state -> do
     let ids = map first state
     MLoops.iterateWhile (`elem` ids) (Random.randomRIO (0, 9999) <&> fourDigits)
@@ -119,12 +120,11 @@ disconnectWeb :: ClientId -> Concurrent.MVar State -> IO ()
 disconnectWeb clientId stateRef = Concurrent.modifyMVar_ stateRef $ \state -> do
   let (tunnels, newState) = List.partition (byClientId clientId) state
   Foldable.traverse_
-    (\tunnel ->
-      case tunnel of
-        (_, _, Just connApp) -> WS.sendClose connApp (LazyText.pack "close") $> ()
-        _ -> pure ()
-    ) $ tunnels
-  pure $ newState
+    (\case
+      (_, _, Just connApp) -> WS.sendClose connApp (LazyText.pack "close") $> ()
+      _ -> pure ()
+    ) tunnels
+  pure newState
 
 disconnectApp :: ClientId -> Concurrent.MVar State -> IO ()
 disconnectApp clientId stateRef = Concurrent.modifyMVar_ stateRef $ \state -> do
@@ -132,4 +132,4 @@ disconnectApp clientId stateRef = Concurrent.modifyMVar_ stateRef $ \state -> do
   Foldable.traverse_ (\tunnel ->
     let (_, connWeb, _) = tunnel
     in WS.sendClose connWeb $ LazyText.pack "close") tunnels
-  pure $ newState
+  pure newState

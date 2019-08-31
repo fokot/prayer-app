@@ -54,3 +54,14 @@ var ws = new WebSocket('ws://localhost:3000/');
 
 ws.onmessage = (event) => console.log('Received: ' + event.data);
 ```
+
+`Hlint` used to fix linting errors
+To install `hlint`
+```bash
+stack install hlint
+```
+
+To run `hlint`
+```bash
+hlit .
+```
