@@ -207,7 +207,7 @@ export const replaceCdnPrayers = async (fileName) => {
 
 export const replaceFromWeb = async (prayersFromWeb) => {
   const prayers = prayersFromWeb.map(({favorite, ...p}) => p);
-  const favoritePrayerIds = prayers.filter(p => p.favorite).map(p => p.id);
+  const favoritePrayerIds = prayersFromWeb.filter(p => p.favorite).map(p => p.id);
   await replacePrayers(prayers, favoritePrayerIds);
 };
 

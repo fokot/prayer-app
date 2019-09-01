@@ -5,6 +5,7 @@ import Json.Encode as Encode
 import List
 import DnDList
 import Uuid exposing (Uuid)
+import List.Extra as List
 
 -- MODEL
 
@@ -37,7 +38,6 @@ prayerEncode p = Encode.object
 type alias Model =
   { dnd          : DnDList.Model
   , prayers      : List Prayer
-  , favorites    : List Prayer
   , openPrayer   : Maybe Prayer
   , clientId     : Maybe String
   , appConnected : Bool
@@ -61,11 +61,9 @@ replacePrayer p ps =
 updatePrayer : Prayer -> Model -> Model
 updatePrayer p model =
   let prayers = model.prayers
-      favorites = model.favorites
       openPrayer = model.openPrayer
   in
   { model | prayers = replacePrayer p prayers
-          , favorites = replacePrayer p favorites
           , openPrayer = Maybe.map (updateWith p) openPrayer
   }
 
@@ -75,14 +73,10 @@ maybeFilter f =
 
 deletePrayer : Prayer -> Model -> Model
 deletePrayer p model =
-  let notPrayer : Prayer -> Bool
-      notPrayer prayer = prayer.id /= p.id
-      prayers = List.filter notPrayer model.prayers
-      favorites = List.filter notPrayer model.favorites
-      openPrayer = maybeFilter notPrayer model.openPrayer
+  let prayers = List.remove p model.prayers
+      openPrayer = maybeFilter (\o -> o.id /= p.id) model.openPrayer
   in
   { model | prayers = prayers
-          , favorites = favorites
           , openPrayer = openPrayer
   }
 

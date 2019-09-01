@@ -1,14 +1,17 @@
 module PrayerList exposing (view, ghostView, update, subscriptions, Msg, system)
 
+import Html
+import Html.Events
+import Json.Decode as Decode
 import List
-import Element exposing (Attribute, Element, alignLeft, alignTop, centerX, centerY, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
+import Element exposing (Attribute, Element, alignLeft, alignRight, centerX, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Events exposing (onClick)
 import Html.Attributes
 import DnDList
-import Model exposing (Model, Prayer, getId)
+import Model exposing (Model, Prayer, deletePrayer, getId, updatePrayer)
 
 
 -- SYSTEM
@@ -36,12 +39,16 @@ subscriptions model =
 
 -- UPDATE
 
-type Msg = OpenPrayer Prayer | Drag DnDList.Msg
+type Msg =
+  Open Prayer
+  | Drag DnDList.Msg
+  | ToggleFavorite Prayer
+  | Delete Prayer
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
-    OpenPrayer p ->
+    Open p ->
       ({ model | openPrayer = Just p }, Cmd.none)
     Drag msg ->
       let
@@ -51,6 +58,10 @@ update message model =
       ( { model | dnd = dnd, prayers = prayers }
       , system.commands model.dnd
       )
+    ToggleFavorite p ->
+      ( updatePrayer { p | favorite = not p.favorite } model, Cmd.none)
+    Delete p ->
+      ( deletePrayer p model, Cmd.none)
 
 -- VIEW
 
@@ -68,15 +79,33 @@ prayerItemAtts =
   , padding 30
   ]
 
+-- stop propagating events, otherwise it will send event also for background element
+onCustomClick : msg -> Html.Attribute msg
+onCustomClick msg =
+  Html.Events.custom "click"
+    (Decode.succeed
+      { message = msg
+      , stopPropagation = True
+      , preventDefault = True
+      }
+    )
+
+icon : List (Attribute msg) -> msg -> String -> Element msg
+icon attrs msg class =
+  Element.el attrs <| Element.html (Html.i [ onCustomClick msg, Html.Attributes.class class ] [])
+
 
 prayerItem : Bool -> Prayer -> Element Msg
 prayerItem selected p =
-  el
-    ( Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
-    :: Font.color (rgb255 255 255 255)
-    :: prayerItemAtts
-    )
-    (text p.name)
+  row
+  ( Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
+  :: Font.color (rgb255 255 255 255)
+  :: prayerItemAtts
+  )
+  [ text p.name
+  , icon [ alignRight ] (Delete p) "fa fa-trash"
+  , icon [ alignRight ] (ToggleFavorite p) (if p.favorite then "fas fa-star" else "far fa-star")
+  ]
 
 emptyItem : Element Msg
 emptyItem =
@@ -103,7 +132,7 @@ prayerView model index prayer =
     Nothing ->
       Element.el
         ((width fill) :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
-          :: onClick (OpenPrayer prayer)
+          :: onClick (Open prayer)
           :: List.map Element.htmlAttribute (system.dragEvents index (getId prayer))
         )
         (prayerItem (model.openPrayer |> Maybe.map (\p -> p.id == prayer.id) |> Maybe.withDefault False) prayer)

@@ -9,7 +9,7 @@ import Element exposing (Attribute, Element, centerX, centerY, column, fill, hei
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import List.Extra exposing (find)
+import List.Extra as List
 import Model exposing (Prayer, maybeGet, prayerEncode)
 import PrayerEdit
 import PrayerList
@@ -66,7 +66,6 @@ initialModel =
     {id = u "73b950be-027a-41d2-a994-531e0ea040d7", name = "4", text = "4", favorite = False},
     {id = u "2a2d1611-c1ee-4431-a6a5-a1ff6ec246ff", name = "5", text = "5", favorite = False}
   ],
-  favorites = [],
   openPrayer = Nothing,
   clientId = Nothing,
   appConnected = False,
@@ -116,7 +115,7 @@ update message model =
       PrayerList.update m model |> mapSecond (Cmd.map PrayerListMsg)
     PrayerEditMsg m -> (PrayerEdit.update m model, Cmd.none)
     New ->
-      case find (\p -> String.isEmpty p.name) model.prayers of
+      case List.find (\p -> String.isEmpty p.name) model.prayers of
         Just p -> ({model | openPrayer = Just p}, Cmd.none)
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
     NewRandomId id -> (addPrayer id model, Cmd.none)
@@ -130,7 +129,6 @@ update message model =
     WsIncoming WsTunnelOpen -> ({ model | appConnected = True }, Cmd.none)
     WsIncoming (WsPrayers prayers)  -> (
       { model | prayers = prayers
-      , favorites = List.filter .favorite prayers
       , openPrayer = Nothing
       }
       , Cmd.none)
