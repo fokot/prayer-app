@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+import Element exposing (Color, rgb255)
 import Json.Decode as JD exposing (Decoder, field)
 import Json.Encode as Encode
 import List
@@ -43,6 +44,9 @@ type alias Model =
   , appConnected : Bool
   , errors       : List String
   }
+
+isSelected : Prayer -> Model -> Bool
+isSelected prayer model = (model.openPrayer |> Maybe.map (\p -> p.id == prayer.id) |> Maybe.withDefault False)
 
 getId : Prayer -> String
 getId = .id >> Uuid.toString
@@ -102,3 +106,6 @@ maybeExists f m =
   case m of
     Just a -> f a
     Nothing -> False
+
+grey : Int -> Color
+grey i = rgb255 i i i

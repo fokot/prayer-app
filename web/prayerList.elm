@@ -11,7 +11,7 @@ import Element.Font as Font
 import Element.Events exposing (onClick)
 import Html.Attributes
 import DnDList
-import Model exposing (Model, Prayer, deletePrayer, getId, updatePrayer)
+import Model exposing (Model, Prayer, deletePrayer, getId, grey, isSelected, updatePrayer)
 
 
 -- SYSTEM
@@ -67,15 +67,13 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, width <| px 200, spacing 5, scrollbarY ]
+  column [ alignLeft, width <| px 200, spacing 10, scrollbarY, padding 5 ]
   (model.prayers |> List.indexedMap (prayerView model))
 
-
-prayerItemAtts : List (Attribute msg)
-prayerItemAtts =
+prayerItemSizeAtts : List (Attribute msg)
+prayerItemSizeAtts =
   [ width fill
   , height <| px 20
-  , Border.rounded 3
   , padding 30
   ]
 
@@ -98,57 +96,66 @@ icon attrs msg class =
 prayerItem : Bool -> Prayer -> Element Msg
 prayerItem selected p =
   row
-  ( Background.color (if selected then (rgb255 0 255 0) else (rgb255 240 0 245))
-  :: Font.color (rgb255 255 255 255)
-  :: prayerItemAtts
+  ([ Background.color (if selected then (rgb255 0 200 0) else (grey 248))
+      , Font.color (if selected then (grey 255) else (grey 0))
+      , Border.rounded 3
+      , Border.solid
+      , Border.width 1
+      , Border.color <| grey 100
+      , Border.shadow { offset = ( 3, 3 )
+                          , size = 2
+                          , blur = 4
+                          , color = grey 100
+                          }
+      ] ++ prayerItemSizeAtts
   )
   [ text p.name
   , icon [ alignRight ] (Delete p) "fa fa-trash"
-  , icon [ alignRight ] (ToggleFavorite p) (if p.favorite then "fas fa-star" else "far fa-star")
+  , icon [ alignRight ] (ToggleFavorite p) (if p.favorite then "fas fa-star text-error" else "far fa-star")
   ]
-
-emptyItem : Element Msg
-emptyItem =
-  el
-    ( Background.color (rgb255 70 70 70)
-    :: prayerItemAtts
-    )
-    (Element.none)
 
 prayerView : Model -> Int -> Prayer -> Element Msg
 prayerView model index prayer =
-  case system.info model.dnd of
+  let selected = isSelected prayer model
+  in case system.info model.dnd of
     Just { dragIndex } ->
       if dragIndex /= index then
         Element.el
           ((width fill) :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
             :: List.map Element.htmlAttribute (system.dropEvents index (getId prayer))
           )
-          (prayerItem False prayer)
+          (prayerItem selected prayer)
         else
           Element.el
-            [ (width fill) , Element.htmlAttribute (Html.Attributes.id (getId prayer)) ]
-            emptyItem
+            ( Background.color (grey 255)
+            :: Border.rounded 3
+            :: Border.dotted
+            :: Border.width 1
+            :: (Border.color <| grey 0)
+            :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
+            :: prayerItemSizeAtts
+            )
+            Element.none
     Nothing ->
       Element.el
         ((width fill) :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
           :: onClick (Open prayer)
           :: List.map Element.htmlAttribute (system.dragEvents index (getId prayer))
         )
-        (prayerItem (model.openPrayer |> Maybe.map (\p -> p.id == prayer.id) |> Maybe.withDefault False) prayer)
+        (prayerItem selected prayer)
 
-ghostView : DnDList.Model -> List Prayer -> Element.Element Msg
-ghostView dnd items =
+ghostView : Model -> Element.Element Msg
+ghostView model =
   let
     maybeDragItem : Maybe Prayer
     maybeDragItem =
-      system.info dnd
-        |> Maybe.andThen (\{ dragIndex } -> items |> List.drop dragIndex |> List.head)
+      system.info model.dnd
+        |> Maybe.andThen (\{ dragIndex } -> model.prayers |> List.drop dragIndex |> List.head)
   in
   case maybeDragItem of
-    Just item ->
+    Just prayer ->
       Element.el
-        (List.map Element.htmlAttribute (system.ghostStyles dnd))
-        (prayerItem False item)
+        (List.map Element.htmlAttribute (system.ghostStyles model.dnd))
+        (prayerItem (isSelected prayer model) prayer)
     Nothing ->
       Element.none

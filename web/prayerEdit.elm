@@ -29,7 +29,7 @@ update message model =
 
 view : Prayer -> Element Msg
 view prayer =
-  column [ alignTop ]
+  column [ alignTop, spacing 10 ]
     [ Input.text
         [ Font.size 32, Font.bold ]
           { onChange = ChangeName

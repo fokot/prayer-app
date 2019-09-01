@@ -10,7 +10,7 @@ import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra as List
-import Model exposing (Prayer, maybeGet, prayerEncode)
+import Model exposing (Prayer, grey, maybeGet, prayerEncode)
 import PrayerEdit
 import PrayerList
 import Platform.Sub as Sub
@@ -150,7 +150,9 @@ button attrs a = Element.Input.button
 view : Model -> Html Msg
 view model =
     Element.layout
-      [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model.dnd model.prayers))
+      [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
+      , Background.color <| grey 248
+      , padding 10
       ]
       (
       column [ height fill ]
