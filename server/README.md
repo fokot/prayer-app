@@ -2,7 +2,7 @@
 
 Server which connects mobile app and web via websockets.
 
-Created whit the help of this [blog](https://www.paramander.com/blog/playing-with-websockets-in-haskell-and-elm) and this [gist](https://gist.github.com/andrevdm/9560b5e31933391694811bf22e25c312) for scotty.
+Created whit the help of this [blog](https://www.paramander.com/blog/playing-with-websockets-in-haskell-and-elm)
 
 ```
  ___                     ___                     _______
