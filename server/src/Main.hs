@@ -22,7 +22,9 @@ import qualified Network.Wai.Handler.Warp       as Warp
 import qualified Network.Wai.Handler.WebSockets as WS
 import qualified Network.WebSockets             as WS
 import qualified System.Random                  as Random
+import qualified System.Environment             as Env
 import qualified Text.Printf                    as Printf (printf)
+import qualified Text.Read                      as Text
 
 type ClientId = String
 type Tunnel   = (ClientId, WS.Connection, Maybe WS.Connection)
@@ -33,10 +35,14 @@ first (x, _, _) = x
 byClientId :: ClientId -> Tunnel -> Bool
 byClientId clientId (tid, _, _) = clientId == tid
 
+
 main :: IO ()
 main = do
+  args <- Env.getArgs
+  let port = Maybe.fromMaybe 3000 $  Maybe.listToMaybe args >>= Text.readMaybe
+  putStr $ "Starting server on port " ++ show port ++ " ..."
   state <- Concurrent.newMVar []
-  Warp.run 3000 $ WS.websocketsOr
+  Warp.run port $ WS.websocketsOr
     WS.defaultConnectionOptions
     (wsApp state)
     httpApp
