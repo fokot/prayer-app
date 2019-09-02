@@ -10,6 +10,9 @@
 - add prayer
 - favorite prayer
 - open all favorite prayers at once
+- add / edit / delete prayer
+- load prayer set
+- edit prayers on web and sync with phone
 
 ## Project Organisation
 - mobile - react-native mobile app
@@ -18,5 +21,4 @@
 
 ## TODO
 - cleaner design
-- prayers lists
-- web editor (and sync to phone) without the need to login
+- different prayers lists
