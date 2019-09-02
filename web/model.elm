@@ -5,6 +5,7 @@ import Json.Decode as JD exposing (Decoder, field)
 import Json.Encode as Encode
 import List
 import DnDList
+import Utils exposing (u)
 import Uuid exposing (Uuid)
 import List.Extra as List
 
@@ -16,9 +17,6 @@ type alias Prayer =
   , text     : String
   , favorite : Bool
   }
-
-u : String -> Uuid
-u id = id |> Uuid.fromString |> maybeGet
 
 prayerDecoder : Decoder Prayer
 prayerDecoder =
@@ -93,19 +91,3 @@ addPrayer id model =
   { model | prayers = prayers
           , openPrayer = openPrayer
   }
-
--- sometimes necessary
-maybeGet : Maybe a -> a
-maybeGet m =
-  case m of
-    Just a -> a
-    Nothing -> Debug.todo "maybeGet"
-
-maybeExists : (a -> Bool) -> Maybe a -> Bool
-maybeExists f m =
-  case m of
-    Just a -> f a
-    Nothing -> False
-
-grey : Int -> Color
-grey i = rgb255 i i i

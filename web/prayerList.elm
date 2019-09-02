@@ -4,14 +4,15 @@ import Html
 import Html.Events
 import Json.Decode as Decode
 import List
-import Element exposing (Attribute, Element, alignLeft, alignRight, centerX, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
+import Element exposing (Attribute, Element, alignLeft, alignRight, centerX, centerY, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Events exposing (onClick)
 import Html.Attributes
 import DnDList
-import Model exposing (Model, Prayer, deletePrayer, getId, grey, isSelected, updatePrayer)
+import Model exposing (Model, Prayer, deletePrayer, getId, isSelected, updatePrayer)
+import Utils exposing (grey)
 
 
 -- SYSTEM
@@ -67,14 +68,20 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, width <| px 200, spacing 10, scrollbarY, padding 5 ]
+  column [ alignLeft, width <| px 300, spacing 10, scrollbarY, padding 5, height fill ]
   (model.prayers |> List.indexedMap (prayerView model))
+
+nameView : Prayer -> String
+nameView p =
+  if String.length p.name < 30
+  then p.name
+  else String.slice 0 27 p.name ++ "..."
 
 prayerItemSizeAtts : List (Attribute msg)
 prayerItemSizeAtts =
   [ width fill
-  , height <| px 20
-  , padding 30
+  , height <| px 60
+  , padding 10
   ]
 
 -- stop propagating events, otherwise it will send event also for background element
@@ -109,9 +116,11 @@ prayerItem selected p =
                           }
       ] ++ prayerItemSizeAtts
   )
-  [ text p.name
-  , icon [ alignRight ] (Delete p) "fa fa-trash"
-  , icon [ alignRight ] (ToggleFavorite p) (if p.favorite then "fas fa-star text-error" else "far fa-star")
+  [ Element.paragraph [Font.size 16, centerY] [text <| nameView p]
+  , row [ alignRight, centerY, height <| px 30, spacing 5]
+    [ icon [] (Delete p) "fa fa-trash"
+    , icon [] (ToggleFavorite p) (if p.favorite then "fas fa-star text-error" else "far fa-star")
+    ]
   ]
 
 prayerView : Model -> Int -> Prayer -> Element Msg

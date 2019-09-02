@@ -1,7 +1,7 @@
 module PrayerEdit exposing (update, view, Msg)
 
-import Model exposing (Prayer, maybeGet)
-import Element exposing (Attribute, Element, column, el, text, row, alignLeft, alignTop, fill, width, rgb255, spacing, centerY, centerX, padding)
+import Model exposing (Prayer)
+import Element exposing (Attribute, Element, alignLeft, alignTop, centerX, centerY, column, el, fill, maximum, padding, rgb255, row, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -9,6 +9,7 @@ import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html.Attributes
 import Model exposing (Model, updatePrayer, emptyPrayer)
+import Utils exposing (maybeGet)
 
 -- UPDATE
 
@@ -29,9 +30,9 @@ update message model =
 
 view : Prayer -> Element Msg
 view prayer =
-  column [ alignTop, spacing 10 ]
+  column [ alignTop, spacing 10, width (fill |> maximum 700) ]
     [ Input.text
-        [ Font.size 32, Font.bold ]
+        [ Font.size 24, Font.bold ]
           { onChange = ChangeName
           , text = prayer.name
           , placeholder = Just (Input.placeholder [] <| text "Name")

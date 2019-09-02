@@ -5,12 +5,12 @@ import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import Element exposing (Attribute, Element, centerX, centerY, column, fill, height, padding, px, rgb255, row, spacing, width)
+import Element exposing (Attribute, Element, alignTop, centerX, centerY, column, fill, height, maximum, padding, px, rgb255, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra as List
-import Model exposing (Prayer, grey, maybeGet, prayerEncode)
+import Model exposing (Prayer, prayerEncode)
 import PrayerEdit
 import PrayerList
 import Platform.Sub as Sub
@@ -21,6 +21,7 @@ import QRCode
 import Tuple exposing (mapSecond)
 import Element.Input
 import Random
+import Utils exposing (grey, u)
 import Uuid exposing (uuidGenerator, Uuid)
 import Element.Background as Background
 import Element.Border as Border
@@ -52,15 +53,12 @@ convertWsToMsg v =
       Err e -> Error <| "unknown ws message: " ++ Decode.errorToString e
       Ok m -> WsIncoming m
 
-u : String -> Uuid
-u id = id |> Uuid.fromString |> maybeGet
-
 initialModel : Model
 initialModel =
   {
   dnd = PrayerList.system.model,
   prayers = [
-    {id = u "2c8ad631-3944-4208-a1c4-53533f56f10d" , name = "1", text = "1", favorite = False},
+    {id = u "2c8ad631-3944-4208-a1c4-53533f56f10d" , name = "OSLOBODENIE OD ŽIADOSTIVOSTI", text = "Pane, vzdávam sa svojej žiadostivosti a prosím Ťa, aby si ma dnes udržal triezveho  od mojej žiadostivosti, lebo ja to nedokážem; ale Tvojou mocou môžem.", favorite = False},
     {id = u "30932625-5359-448c-84a4-1a268180b11e", name = "2", text = "2", favorite = False},
     {id = u "b2f1b200-6f90-430d-beb3-12756c5bd12d", name = "3", text = "3", favorite = False},
     {id = u "73b950be-027a-41d2-a994-531e0ea040d7", name = "4", text = "4", favorite = False},
@@ -153,23 +151,24 @@ view model =
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
       , Background.color <| grey 248
       , padding 10
+      , width fill
       ]
       (
       column [ height fill ]
       [ column [] <| List.map Element.text model.errors
       , row [ spacing 5 ]
-          [ button [Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
-          , button [ Background.color <| rgb255 255 255 255]
-            { onPress = Just Load
-            , label = Element.html <| Html.img [ Html.Attributes.src "/img/load.png", Html.Attributes.width 160, Html.Attributes.height 120] []
-            }
-          , button []
-            { onPress = Just Save
-            , label = Element.html <| Html.img [ Html.Attributes.src "/img/save.png", Html.Attributes.width 160, Html.Attributes.height 120] []
-            }
-          , clientIdView model.clientId model.appConnected
-          ]
-      , row [ width fill, centerY, spacing 30 ]
+        [ button [Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
+        , button [ Background.color <| rgb255 255 255 255]
+          { onPress = Just Load
+          , label = Element.html <| Html.img [ Html.Attributes.src "/img/load.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+          }
+        , button []
+          { onPress = Just Save
+          , label = Element.html <| Html.img [ Html.Attributes.src "/img/save.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+          }
+        , clientIdView model.clientId model.appConnected
+        ]
+      , row [ width fill, alignTop, spacing 30 ]
         [ Element.map PrayerListMsg (PrayerList.view model)
         , case model.openPrayer of
             Nothing -> Element.text "No prayer selected"
@@ -180,7 +179,9 @@ view model =
 
 clientIdView : Maybe String -> Bool -> Element msg
 clientIdView code appConnected =
-  case code of
+  if appConnected
+  then Element.el [Font.size 32] (Element.text "Phone\nconnected")
+  else case code of
     Just c ->
       Element.el [ Background.color <| if appConnected then rgb255 0 220 0 else rgb255 255 255 255 ]
         (qrCodeView c)
@@ -189,7 +190,5 @@ clientIdView code appConnected =
 qrCodeView : String -> Element msg
 qrCodeView message =
   QRCode.encode message
-    |> Result.map QRCode.toSvg
-    |> Result.withDefault
-      (Html.text "Error while encoding to QRCode.")
-    |> Element.html
+    |> Result.map (QRCode.toSvg >>  Element.html)
+    |> Result.withDefault (Element.text "Error while encoding to QRCode.")
