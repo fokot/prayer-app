@@ -1,4 +1,3 @@
-FROM ubuntu:16.04
 FROM fpco/stack-build-small:lts-14 AS build-env
 WORKDIR /app
 ADD . /app
