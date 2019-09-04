@@ -17,7 +17,7 @@ Created whit the help of this [blog](https://www.paramander.com/blog/playing-wit
 
 Web is connected with with `web` path like 
 ```
-ws://localhost:3000/web
+ws://localhost:3000/ws/web
 ```
 and it returns the code (`clientId`) e.g.
 ```
@@ -25,10 +25,10 @@ and it returns the code (`clientId`) e.g.
 ```
 with which we can connect single client e.g. 
 ```
-ws://localhost:3000/5777
+ws://localhost:3000/ws/5777
 ```
 
-Request with `web` as path are always accepted and new `clientId` is returned. 
+Request with `/ws/web` as path are always accepted and new `clientId` is returned. 
  
 Requests with other paths are accepted only if there is websocket with such `clientId` connected.
 Only single client can be connected. All subsequent tries are rejected.
