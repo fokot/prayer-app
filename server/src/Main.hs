@@ -39,7 +39,7 @@ byClientId clientId (tid, _, _) = clientId == tid
 main :: IO ()
 main = do
   args <- Env.getArgs
-  let port = Maybe.fromMaybe 3000 $  Maybe.listToMaybe args >>= Text.readMaybe
+  let port = Maybe.fromMaybe 3000 $ Maybe.listToMaybe args >>= Text.readMaybe
   putStr $ "Starting server on port " ++ show port ++ " ..."
   state <- Concurrent.newMVar []
   Warp.run port $ WS.websocketsOr
@@ -64,32 +64,36 @@ withoutClient clientId = List.filter ((/=) clientId . first)
 
 wsApp :: Concurrent.MVar State -> WS.ServerApp
 wsApp stateRef pendingConn = do
-  let path = drop 1 $ BSU.toString $ WS.requestPath $ WS.pendingRequest pendingConn
-  if path == "web"
-    then do
-      connWeb <- WS.acceptRequest pendingConn
-      clientId <- nextId stateRef
-      connectWeb connWeb clientId stateRef
-      WS.forkPingThread connWeb 30
-      Exception.finally
-        (listenWeb connWeb clientId stateRef)
-        (disconnectWeb clientId stateRef)
-    else do
-      state <- Concurrent.readMVar stateRef
-      let clientId = path
-      let tunnel = List.find (byClientId clientId) state
-      case tunnel of
-        Just t@(_, connWeb, Nothing) -> do
-          connApp <- WS.acceptRequest pendingConn
-          connectApp connApp stateRef t
-          WS.forkPingThread connApp 30
-          Exception.finally
-            (listenApp connApp connWeb)
-            (disconnectApp clientId stateRef)
-        Just (_, _, Just _) ->
-          WS.rejectRequest pendingConn $ BSU.fromString "Already connected"
-        Nothing ->
-          WS.rejectRequest pendingConn $ BSU.fromString "No such web app open"
+  let fullPath = BSU.toString $ WS.requestPath $ WS.pendingRequest pendingConn
+  case List.stripPrefix "/ws/" fullPath of
+    Nothing ->
+      WS.rejectRequest pendingConn $ BSU.fromString "No such path"
+    Just path ->
+      if path == "web"
+      then do
+        connWeb <- WS.acceptRequest pendingConn
+        clientId <- nextId stateRef
+        connectWeb connWeb clientId stateRef
+        WS.forkPingThread connWeb 30
+        Exception.finally
+          (listenWeb connWeb clientId stateRef)
+          (disconnectWeb clientId stateRef)
+      else do
+        state <- Concurrent.readMVar stateRef
+        let clientId = path
+        let tunnel = List.find (byClientId clientId) state
+        case tunnel of
+          Just t@(_, connWeb, Nothing) -> do
+            connApp <- WS.acceptRequest pendingConn
+            connectApp connApp stateRef t
+            WS.forkPingThread connApp 30
+            Exception.finally
+              (listenApp connApp connWeb)
+              (disconnectApp clientId stateRef)
+          Just (_, _, Just _) ->
+            WS.rejectRequest pendingConn $ BSU.fromString "Already connected"
+          Nothing ->
+            WS.rejectRequest pendingConn $ BSU.fromString "No such web app open"
 
 connectWeb :: WS.Connection -> ClientId -> Concurrent.MVar State -> IO ()
 connectWeb connWeb clientId stateRef = do

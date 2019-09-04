@@ -68,7 +68,7 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, width <| px 300, spacing 10, scrollbarY, padding 5, height fill ]
+  column [ alignLeft, width <| px 300, spacing 5, scrollbarY, padding 5, height fill ]
   (model.prayers |> List.indexedMap (prayerView model))
 
 nameView : Prayer -> String
@@ -109,11 +109,11 @@ prayerItem selected p =
       , Border.solid
       , Border.width 1
       , Border.color <| grey 100
-      , Border.shadow { offset = ( 3, 3 )
-                          , size = 2
-                          , blur = 4
-                          , color = grey 100
-                          }
+--      , Border.shadow { offset = ( 3, 3 )
+--                          , size = 2
+--                          , blur = 4
+--                          , color = grey 100
+--                          }
       ] ++ prayerItemSizeAtts
   )
   [ Element.paragraph [Font.size 16, centerY] [text <| nameView p]

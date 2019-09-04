@@ -156,7 +156,7 @@ export const useFavoritePrayers = () => useStore(s => s.favoritePrayerIds.map(id
 
 // NETWORK
 
-const STORAGE_PATH = 'https://storage.googleapis.com/prayers/';
+const STORAGE_PATH = 'https://storage.googleapis.com/prayer-app/prayers/';
 
 export const getCdnPrayers = () =>
   fetch(`${STORAGE_PATH}all.json`).then(x => x.json());

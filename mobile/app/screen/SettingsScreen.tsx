@@ -135,7 +135,12 @@ const Sync = ({closeSync}) => {
 const Syncing = ({clientId, closeSync}) => {
   useEffect(
     () => {
-      const ws = new WebSocket(`ws://192.168.0.26:3000/${clientId}`);
+      // const ws = new WebSocket(`ws://192.168.43.6/${clientId}`);
+      const ws = new WebSocket(`ws://192.168.0.26:3000/ws/k${clientId}`);
+      // const x = `ws://prayer-app.tk/${clientId}`;
+      // alert(x);
+      // const ws = new WebSocket(x);
+      // const ws = new WebSocket(`ws://prayer-app.tk/${clientId}`);
 
       ws.onmessage = function (event) {
 
@@ -157,6 +162,10 @@ const Syncing = ({clientId, closeSync}) => {
           replaceFromWeb(data);
         }
       };
+
+
+      // ws.onerror = ({type}) => alert(JSON.stringify(Object.keys(type), null, 2));
+      // ws.onerror = ({type}) => alert(type);
 
       ws.onclose = closeSync;
       return () => ws.close();

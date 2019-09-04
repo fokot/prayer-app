@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Main</title>
-  <link rel="stylesheet" href="whatever-you-want.css">
   <script src="main.js"></script>
   <!-- reconnecting-websocket-iife.min from https://github.com/pladaria/reconnecting-websocket  -->
   <script src="reconnecting-websocket-iife.min.js"></script>
@@ -18,7 +17,8 @@
   });
 
   window.app = app;
-  const ws = new ReconnectingWebSocket('ws://localhost:3000/web');
+  const ws = new ReconnectingWebSocket('ws://localhost:3000/ws/web');
+  // const ws = new ReconnectingWebSocket('ws://prayer-app.tk/ws/web');
 
   app.ports.wsSend.subscribe(data => ws.send(JSON.stringify(data)));
   ws.onmessage = ({data}) => app.ports.wsReceive.send(JSON.parse(data));
