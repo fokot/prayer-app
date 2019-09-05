@@ -57,13 +57,7 @@ initialModel : Model
 initialModel =
   {
   dnd = PrayerList.system.model,
-  prayers = [
-    {id = u "2c8ad631-3944-4208-a1c4-53533f56f10d" , name = "OSLOBODENIE OD ŽIADOSTIVOSTI", text = "Pane, vzdávam sa svojej žiadostivosti a prosím Ťa, aby si ma dnes udržal triezveho  od mojej žiadostivosti, lebo ja to nedokážem; ale Tvojou mocou môžem.", favorite = False},
-    {id = u "30932625-5359-448c-84a4-1a268180b11e", name = "2", text = "2", favorite = False},
-    {id = u "b2f1b200-6f90-430d-beb3-12756c5bd12d", name = "3", text = "3", favorite = False},
-    {id = u "73b950be-027a-41d2-a994-531e0ea040d7", name = "4", text = "4", favorite = False},
-    {id = u "2a2d1611-c1ee-4431-a6a5-a1ff6ec246ff", name = "5", text = "5", favorite = False}
-  ],
+  prayers = [],
   openPrayer = Nothing,
   clientId = Nothing,
   appConnected = False,
@@ -124,7 +118,11 @@ update message model =
       else (model, wsSend <| Encode.list prayerEncode model.prayers)
     WsIncoming (WsClientId clientId) -> ({ model | clientId = Just clientId }, Cmd.none)
     WsIncoming WsClosed -> ({ model | clientId = Nothing, appConnected = False }, Cmd.none)
-    WsIncoming WsTunnelOpen -> ({ model | appConnected = True }, Cmd.none)
+    WsIncoming WsTunnelOpen ->
+      (
+        { model | appConnected = True }
+        , if List.isEmpty model.prayers then wsSend <| Encode.string "load" else Cmd.none
+      )
     WsIncoming (WsPrayers prayers)  -> (
       { model | prayers = prayers
       , openPrayer = Nothing
