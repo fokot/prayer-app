@@ -1,0 +1,13 @@
+{
+  "Language": "Language",
+  "DarkMode": "Dark mode",
+  "TextSize": "Text size",
+  "LoadPrayers": "Load prayers",
+  "EditStart": "To edit prayers on the computer open ",
+  "EditMiddle": " in browser, press",
+  "EditInBrowser": "Edit in browser",
+  "EditEnd": "and scan the QR code.",
+  "AddPrayers": "Add prayers",
+  "ReplacePrayers": "Replace prayers",
+  "Cancel": "Cancel"
+}

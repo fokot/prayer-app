@@ -47,8 +47,14 @@ const dbDeletePrayer = (id) =>
 //   return  await AsyncStorage.setItem('FavoritesPrayerIds', JSON.stringify([]));
 // }
 
+export enum Language {
+  en,
+  sk,
+}
+
 type StoreType = {
   settings: {
+    language: Language,
     darkMode: false
   },
   prayers: {[index: string]: Prayer},
@@ -58,7 +64,8 @@ type StoreType = {
 
 const initialStore: StoreType = {
   settings: {
-    darkMode: false
+    darkMode: false,
+    language: Language.en,
   },
   prayers: {},
   allPrayerIds: [],
@@ -211,3 +218,18 @@ export const replaceFromWeb = async (prayersFromWeb) => {
   await replacePrayers(prayers, favoritePrayerIds);
 };
 
+const translationGetters = {
+  // lazy requires (metro bundler does not support symlinks)
+  [Language.en]: () => require("../../assets/translations/en.json"),
+  [Language.sk]: () => require("../../assets/translations/sk.json"),
+};
+
+export const setLanguage = async (language) => {
+  const store = updateStore(s =>
+    ({...s, settings: {...s.settings, language, }})
+  );
+  await AsyncStorage.setItem(SETTINGS, JSON.stringify(store.settings));
+};
+
+export const useMessages = () =>
+  useStore(s => translationGetters[s.settings.language]());

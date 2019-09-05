@@ -9,3 +9,7 @@ export const circleActive = '#90ee90';
 export const itemListText = '#555555';
 export const itemListTextStrike = '#c4c4cc';
 export const deleteIconColor = '#bc2e4c';
+export const blue = '#2196f3';
+export const blueLight = '#79bef2';
+export const white = 'white';
+export const black = 'black';

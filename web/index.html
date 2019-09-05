@@ -17,7 +17,8 @@
   });
 
   window.app = app;
-  const ws = new ReconnectingWebSocket('ws://localhost:3000/ws/web');
+  const ws = new ReconnectingWebSocket('ws://' + location.host + '/ws/web');
+  // const ws = new ReconnectingWebSocket('ws://localhost:3000/ws/web');
   // const ws = new ReconnectingWebSocket('ws://prayer-app.tk/ws/web');
 
   app.ports.wsSend.subscribe(data => ws.send(JSON.stringify(data)));
@@ -27,3 +28,4 @@
 </script>
 </body>
 </html>
+https://storage.cloud.google.com/prayer-app/prayers/sa-english.json

@@ -1,0 +1,13 @@
+{
+  "Language": "Jazyk",
+  "DarkMode": "Tmavý mód",
+  "TextSize": "Veľkosť textu",
+  "LoadPrayers": "Nahrať modlitby",
+  "EditStart": "Pre úpravu otvor ",
+  "EditMiddle": " na počítači, stlač",
+  "EditInBrowser": "Upraviť v prehliadači",
+  "EditEnd": "a naskenuj QR kód.",
+  "AddPrayers": "Pridať modlitby",
+  "ReplacePrayers": "Prepísať modlitby",
+  "Cancel": "Zrušiť"
+}

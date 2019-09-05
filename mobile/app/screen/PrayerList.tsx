@@ -5,9 +5,10 @@ import {createMaterialTopTabNavigator} from "react-navigation";
 import {SettingsScreen} from "./SettingsScreen";
 import {AllList} from "./AllList";
 import {FavoriteList} from "./FavoriteList";
+import {black, blue, blueLight, white} from "../utils/Colors";
 
 const TabBarIcon = (name) => ({focused, }) =>
-  (<Ionicons size={32} name={name} color={focused ? 'green' : 'black'} />);
+  (<Ionicons size={32} name={name} color={focused ? white : black} />);
 
 const HomeScreen = createMaterialTopTabNavigator(
   {
@@ -36,23 +37,15 @@ const HomeScreen = createMaterialTopTabNavigator(
     tabBarOptions: {
       showIcon: true,
       showLabel: false,
-      activeTintColor: '#979CA8',
-      inactiveTintColor: '#B7BAC7',
       scrollEnabled: true,
       style: {
-        backgroundColor: '#FFF',
+        backgroundColor: blue,
         elevation: 0,
-        borderBottomColor: '#DFE2EF',
-        borderBottomWidth: 1,
-      },
-      labelStyle: {
-        fontSize: 14,
-        fontWeight: '500',
+        borderTopColor: black,
+        borderTopWidth: 1,
       },
       indicatorStyle: {
-        backgroundColor: '#00D395',
-        height: 1,
-        marginBottom: -1,
+        backgroundColor: white,
       },
     },
   }

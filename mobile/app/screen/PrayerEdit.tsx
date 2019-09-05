@@ -4,8 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import {usePrayer, savePrayer} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
 import uuid from 'uuid/v1';
-
-// yarn add  @types/ramda
+import {blue} from "../utils/Colors";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -28,7 +27,7 @@ export const PrayerEdit = ({navigation}) => {
             paddingTop: 32,
             paddingBottom: 16,
             paddingHorizontal: 16,
-            backgroundColor: '#2196f3',
+            backgroundColor: blue,
             height: 80,
             display: "flex",
             flexDirection: "row",
@@ -36,7 +35,8 @@ export const PrayerEdit = ({navigation}) => {
           }}
         >
           <Icon
-            name="md-arrow-back"
+            style={{paddingRight: 20}}
+            name="ios-arrow-back"
             onPress={() => navigation.goBack()}
           />
           <View

@@ -39,7 +39,8 @@ export const Prayer = ({navigation}) => {
           }}
         >
           <Icon
-            name="md-arrow-back"
+            style={{paddingRight: 20}}
+            name="ios-arrow-back"
             onPress={() => navigation.goBack()}
           />
           <View

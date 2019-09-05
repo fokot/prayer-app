@@ -27,10 +27,11 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.fokot.prayerApp"
+      "package": "com.fokot.prayerApp",
+      "permissions": ["CAMERA"]
     },
     "androidStatusBar": {
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2196f3"
     }
   }
 }

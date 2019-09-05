@@ -1,74 +1,85 @@
-import {Button, FlatList, Modal, Picker, Slider, StyleSheet, Switch, Text, View} from "react-native";
+import {FlatList, Modal, Picker, ScrollView, Slider, StyleSheet, Switch, Text, View} from "react-native";
+import { Button } from "../components/Button";
 import React, {useEffect, useState} from "react";
 import {
   addCdnPrayers,
   currentStore,
-  getCdnPrayers,
+  getCdnPrayers, Language,
   replaceCdnPrayers,
-  replaceFromWeb,
+  replaceFromWeb, setLanguage,
   toggleDarkMode,
   useBackgroundColor,
-  useStore
+  useStore,
 } from "../utils/PrayerStore";
 import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
+import {blue} from "../utils/Colors";
+import {LocalText} from "../components/LocalText";
+
+const margin = 8;
+const fontSize = 20;
 
 export const SettingsScreen = () => {
-  const darkMode = useStore(s => s.settings.darkMode);
+  const { language, darkMode, }  = useStore(s => s.settings);
   const backgroundColor = useBackgroundColor();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
   const [showSync, setShowSync] = useState(false);
   const closeModal = () => setShowPrayersPicker(false);
   return (
-    <View
+    <ScrollView
       style={{
         backgroundColor: backgroundColor,
+        marginHorizontal: margin,
       }}
     >
-      <View>
-        <Text>Language</Text>
+      <View style={{
+        marginVertical: margin,
+        display: "flex",
+        justifyContent: "space-between"
+      }}>
+        <LocalText style={{fontSize}} m="Language" />
         <Picker
-          selectedValue={"English"}
+          selectedValue={language}
           style={{height: 50, width: 100}}
-          onValueChange={(itemValue, itemIndex) =>
-            alert({language: itemValue})
-          }>
-          <Picker.Item label="English" value="English"/>
-          <Picker.Item label="Slovak" value="Slovak"/>
+          onValueChange={setLanguage}>
+          <Picker.Item label="English" value={Language.en}/>
+          <Picker.Item label="Slovak" value={Language.sk}/>
         </Picker>
       </View>
-      <View>
-        <Text>Dark mode</Text>
+      <View style={{marginVertical: margin}}>
+        <LocalText style={{fontSize}} m={'DarkMode'} />
         <Switch value={darkMode} onValueChange={toggleDarkMode}/>
       </View>
-      <View>
-        <Text>Text size</Text>
+      <View style={{marginVertical: margin}}>
+        <LocalText style={{fontSize}} m="TextSize"/>
         <Slider value={5} minimumValue={3} maximumValue={30}/>
       </View>
-      <View
+      <Button
+        style={{marginVertical: 2 * margin}}
+        onPress={() => setShowPrayersPicker(true)}
+        title={<LocalText m="LoadPrayers"/>}
+        color="#841584"
+      />
+      <Text
         style={{
-          padding: 16
+          marginTop: 2 * margin,
+          fontSize,
         }}
       >
-        <Button
-          onPress={() => setShowPrayersPicker(true)}
-          title="Load prayers"
-          color="#841584"
+        <LocalText
+          m="EditStart"
         />
-      </View>
-      <View
-        style={{
-          padding: 16
-        }}
-      >
-        <Button
-          onPress={() => setShowSync(true)}
-          title="Edit in browser"
-          color="#841584"
-        />
-      </View>
+        <Text style={{fontWeight: "bold"}}>prayer-app.tk</Text>
+        <LocalText m="EditMiddle" />
+      </Text>
+      <Button
+        onPress={() => setShowSync(true)}
+        title={<LocalText m="EditInBrowser"/>}
+        color="#841584"
+      />
+      <LocalText style={{fontSize}} m="EditEnd" />
       <Modal
         animationType="slide"
         transparent={false}
@@ -83,7 +94,7 @@ export const SettingsScreen = () => {
         onRequestClose={() => setShowSync(false)}>
         <Sync closeSync={() => setShowSync(false)}/>
       </Modal>
-    </View>
+    </ScrollView>
   )
 };
 
@@ -136,10 +147,10 @@ const Syncing = ({clientId, closeSync}) => {
   useEffect(
     () => {
       // const ws = new WebSocket(`ws://192.168.43.6/${clientId}`);
-      const ws = new WebSocket(`ws://192.168.0.26:3000/ws/k${clientId}`);
-      // const x = `ws://prayer-app.tk/${clientId}`;
+      // const ws = new WebSocket(`ws://192.168.0.26:3000/ws/${clientId}`);
+      const x = `ws://prayer-app.tk/ws/${clientId}`;
       // alert(x);
-      // const ws = new WebSocket(x);
+      const ws = new WebSocket(x);
       // const ws = new WebSocket(`ws://prayer-app.tk/${clientId}`);
 
       ws.onmessage = function (event) {
@@ -225,33 +236,44 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
     <Ionicons name="md-close"
               onPress={closeModal}
               size={32} color="green"/>
-    <Text
+    <View
       style={{
-        padding: 16,
-        fontWeight: 'bold',
-        color: 'black',
-        fontSize: 24,
-        textAlign: 'center',
+        height: '100%',
+        display: 'flex',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
       }}
-    >{name}</Text>
-    <Button
-      onPress={() =>
-        addCdnPrayers(file).then(closeModal())
-      }
-      title="Add prayers"
-      color="#841584"
-    />
-    <Button
-      onPress={() =>
-        replaceCdnPrayers(file).then(closeModal())
-      }
-      title="Replace prayers"
-      color="#841584"
-    />
-    <Button
-      onPress={closeModal}
-      title="Cancel"
-      color="#841584"
-    />
+    >
+      <View>
+      <Text
+        style={{
+          fontWeight: 'bold',
+          color: 'black',
+          fontSize: 24,
+          textAlign: 'center',
+        }}
+      >{name}</Text>
+      <Button
+        style={{marginVertical: margin}}
+        onPress={() =>
+          addCdnPrayers(file).then(closeModal())
+        }
+        title={<LocalText m="AddPrayers" />}
+      />
+      <Button
+        style={{marginVertical: margin}}
+        onPress={() =>
+          replaceCdnPrayers(file).then(closeModal())
+        }
+        title={<LocalText m="ReplacePrayers" />}
+      />
+      <Button
+        style={{marginVertical: margin}}
+        onPress={closeModal}
+        title={<LocalText m="Cancel" />}
+      />
+    </View>
+    </View>
   </View>
 )
