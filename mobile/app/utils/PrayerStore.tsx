@@ -53,6 +53,7 @@ export enum Language {
 }
 
 type StoreType = {
+  initialised: boolean,
   settings: {
     language: Language,
     darkMode: boolean,
@@ -63,6 +64,7 @@ type StoreType = {
 }
 
 const initialStore: StoreType = {
+  initialised: false,
   settings: {
     darkMode: false,
     language: Language.en,
@@ -85,12 +87,15 @@ const readAllData = async (): Promise<StoreType> => {
   const prayers = await AsyncStorage.multiGet(allPrayerIds).then(x => x.map(p => JSON.parse(p[1])));
 
   return {
+    initialised: true,
     settings,
     allPrayerIds,
     favoritePrayerIds,
     prayers: fromPairs(prayers.map(p => [p.id, p])),
   };
 };
+
+export const useInitialised = () => useStore(s => s.initialised);
 
 // read store from database
 readAllData().then(
