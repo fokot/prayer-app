@@ -1,4 +1,15 @@
-import {FlatList, Modal, Picker, ScrollView, Slider, StyleSheet, Switch, Text, View} from "react-native";
+import {
+  FlatList,
+  Modal,
+  Picker,
+  ScrollView,
+  Slider,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { Button } from "../components/Button";
 import React, {useEffect, useState} from "react";
 import {
@@ -15,7 +26,7 @@ import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
-import {black, blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
+import {blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
 import {AppText} from "../components/AppText";
 
@@ -114,6 +125,7 @@ export const SettingsScreen = () => {
 
 const Sync = ({closeSync}) => {
 
+  const backgroundColor = useBackgroundColor();
   const [clientId, setClientId] = useState(null);
   const [hasCameraPermission, setCameraPermission] = useState(null);
 
@@ -141,6 +153,8 @@ const Sync = ({closeSync}) => {
 
   return (
     <View style={{
+      backgroundColor,
+      height: '100%',
       flex: 1,
       flexDirection: 'column',
       justifyContent: 'flex-end',
@@ -197,11 +211,17 @@ const Syncing = ({clientId, closeSync}) => {
     }
   );
 
-  return <AppText>Syncing...{clientId}</AppText>
+  const backgroundColor = useBackgroundColor()
+  return (
+    <View style={{backgroundColor, height: '100%'}}>
+      <AppText>Syncing...{clientId}</AppText>
+    </View>
+  );
 }
 
 const PrayerModal = ({closeModal}) => {
   const [prayers, setPrayers] = useState([]);
+  const backgroundColor = useBackgroundColor();
   useEffect(
     () => {
       getCdnPrayers().then(setPrayers);
@@ -211,13 +231,13 @@ const PrayerModal = ({closeModal}) => {
   );
   const [selectedPrayer, setSelectedPrayer] = useState(null);
   return (
-    <View style={{margin: 22}}>
+    <View style={{backgroundColor, padding: margin, height: '100%'}}>
       {selectedPrayer ?
         <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
         <View>
           <Ionicons name="md-close"
                     onPress={closeModal}
-                    size={32} color="green"/>
+                    size={32} color={blue}/>
           {prayers.length < 1 ?
             <AppText>Loading...</AppText> :
             <FlatList
@@ -234,42 +254,48 @@ const PrayerModal = ({closeModal}) => {
 }
 
 const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
+    <TouchableOpacity
+        onPress={selectPrayer}
+    >
   <AppText style={{
-    padding: 16,
+    padding: 15,
     fontWeight: 'bold',
-    color: 'black',
     fontSize: 24,
     textAlign: 'center',
   }}
-        onPress={selectPrayer}
   >{name}</AppText>
+    </TouchableOpacity>
 );
 
-const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
-  <View>
+const SelectedPrayer = ({prayer: {name, file}, closeModal}) => {
+  const backgroundColor = useBackgroundColor();
+  return (
+  <View style={{backgroundColor, height: '100%', width: '100%'}}>
     <Ionicons name="md-close"
               onPress={closeModal}
-              size={32} color="green"/>
+              size={32} color={blue}/>
     <View
       style={{
         height: '100%',
         display: 'flex',
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        width: '100%'
       }}
     >
-      <View>
+      <View
+        style={{width: '100%'}}
+      >
       <AppText
         style={{
           fontWeight: 'bold',
-          color: 'black',
           fontSize: 24,
           textAlign: 'center',
         }}
       >{name}</AppText>
       <Button
-        style={{marginVertical: margin}}
+        style={{marginVertical: margin, width: '100%'}}
         onPress={() =>
           addCdnPrayers(file).then(closeModal())
         }
@@ -290,4 +316,4 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
     </View>
     </View>
   </View>
-)
+)}
