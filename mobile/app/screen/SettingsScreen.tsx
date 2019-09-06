@@ -42,7 +42,7 @@ export const SettingsScreen = () => {
         <LocalText style={{fontSize}} m="Language" />
         <Picker
           selectedValue={language}
-          style={{height: 50, width: 100}}
+          itemStyle={{fontSize}}
           onValueChange={setLanguage}>
           <Picker.Item label="English" value={Language.en}/>
           <Picker.Item label="Slovak" value={Language.sk}/>
