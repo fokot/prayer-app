@@ -19,7 +19,7 @@ systemctl start prayer-app-server
 systemctl enable prayer-app-server
 ```
 
-# Nginx
+## Nginx
 * I set it up with help of this [article](https://medium.com/@jgefroh/a-guide-to-using-nginx-for-static-websites-d96a9d034940)
 * Static files are in `/var/www/prayer-app.tk/`
 * Nginx config is in `/etc/nginx/sites-available/prayer-app.tk`
