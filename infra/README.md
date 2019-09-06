@@ -18,3 +18,12 @@ systemctl start prayer-app-server
 ```bash
 systemctl enable prayer-app-server
 ```
+
+# Nginx
+* Static files are in `/var/www/prayer-app.tk/`
+* Nginx config is in `/etc/nginx/sites-available/prayer-app.tk`
+and symlinked to `sites-enabled`
+* After making changes to config nginx must be restarted like
+```bash
+sudo systemctl restart nginx
+``` 
