@@ -10,7 +10,7 @@ import {black, blue, blueLight, white} from "../utils/Colors";
 const TabBarIcon = (name) => ({focused, }) =>
   (<Ionicons size={32} name={name} color={focused ? white : black} />);
 
-const HomeScreen = createMaterialTopTabNavigator(
+const Home = createMaterialTopTabNavigator(
   {
     Favorites: {
       screen: FavoriteList,
@@ -41,6 +41,7 @@ const HomeScreen = createMaterialTopTabNavigator(
       style: {
         backgroundColor: blue,
         elevation: 0,
+        height: 50,
       },
       indicatorStyle: {
         backgroundColor: white,
@@ -50,4 +51,4 @@ const HomeScreen = createMaterialTopTabNavigator(
 );
 
 
-export default HomeScreen;
+export default Home;

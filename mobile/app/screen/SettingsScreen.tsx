@@ -9,7 +9,7 @@ import {
   replaceFromWeb, setLanguage,
   toggleDarkMode,
   useBackgroundColor,
-  useStore,
+  useStore, useTextColor,
 } from "../utils/PrayerStore";
 import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
@@ -17,6 +17,7 @@ import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
 import {black, blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
+import {AppText} from "../components/AppText";
 
 const margin = 8;
 const fontSize = 20;
@@ -27,21 +28,23 @@ export const SettingsScreen = () => {
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
   const [showSync, setShowSync] = useState(false);
   const closeModal = () => setShowPrayersPicker(false);
+  const textColor = useTextColor();
   return (
     <ScrollView
       style={{
-        backgroundColor: backgroundColor,
-        marginHorizontal: margin,
+        backgroundColor,
+        paddingHorizontal: margin,
       }}
     >
       <View style={{
         marginVertical: margin,
         display: "flex",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
       }}>
         <LocalText style={{fontSize}} m="Language" />
         <Picker
           selectedValue={language}
+          style={{color: textColor}}
           itemStyle={{fontSize}}
           onValueChange={setLanguage}>
           <Picker.Item label="English" value={Language.en}/>
@@ -70,10 +73,10 @@ export const SettingsScreen = () => {
       <Button
         style={{marginVertical: 2 * margin}}
         onPress={() => setShowPrayersPicker(true)}
-        title={<LocalText m="LoadPrayers"/>}
+        m="LoadPrayers"
         color="#841584"
       />
-      <Text
+      <AppText
         style={{
           marginTop: 2 * margin,
           fontSize,
@@ -82,12 +85,12 @@ export const SettingsScreen = () => {
         <LocalText
           m="EditStart"
         />
-        <Text style={{fontWeight: "bold"}}>prayer-app.tk</Text>
+        <AppText style={{fontWeight: "bold"}}>prayer-app.tk</AppText>
         <LocalText m="EditMiddle" />
-      </Text>
+      </AppText>
       <Button
         onPress={() => setShowSync(true)}
-        title={<LocalText m="EditInBrowser"/>}
+        m="EditInBrowser"
         color="#841584"
       />
       <LocalText style={{fontSize}} m="EditEnd" />
@@ -126,10 +129,10 @@ const Sync = ({closeSync}) => {
   );
 
   if (hasCameraPermission === null) {
-    return <Text>Requesting for camera permission</Text>;
+    return <AppText>Requesting for camera permission</AppText>;
   }
   if (hasCameraPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <AppText>No access to camera</AppText>;
   }
 
   if (clientId) {
@@ -194,7 +197,7 @@ const Syncing = ({clientId, closeSync}) => {
     }
   );
 
-  return <Text>Syncing...{clientId}</Text>
+  return <AppText>Syncing...{clientId}</AppText>
 }
 
 const PrayerModal = ({closeModal}) => {
@@ -216,7 +219,7 @@ const PrayerModal = ({closeModal}) => {
                     onPress={closeModal}
                     size={32} color="green"/>
           {prayers.length < 1 ?
-            <Text>Loading...</Text> :
+            <AppText>Loading...</AppText> :
             <FlatList
               data={prayers}
               renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)}/>}
@@ -231,7 +234,7 @@ const PrayerModal = ({closeModal}) => {
 }
 
 const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
-  <Text style={{
+  <AppText style={{
     padding: 16,
     fontWeight: 'bold',
     color: 'black',
@@ -239,7 +242,7 @@ const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
     textAlign: 'center',
   }}
         onPress={selectPrayer}
-  >{name}</Text>
+  >{name}</AppText>
 );
 
 const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
@@ -257,32 +260,32 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
       }}
     >
       <View>
-      <Text
+      <AppText
         style={{
           fontWeight: 'bold',
           color: 'black',
           fontSize: 24,
           textAlign: 'center',
         }}
-      >{name}</Text>
+      >{name}</AppText>
       <Button
         style={{marginVertical: margin}}
         onPress={() =>
           addCdnPrayers(file).then(closeModal())
         }
-        title={<LocalText m="AddPrayers" />}
+        m="AddPrayers"
       />
       <Button
         style={{marginVertical: margin}}
         onPress={() =>
           replaceCdnPrayers(file).then(closeModal())
         }
-        title={<LocalText m="ReplacePrayers" />}
+        m="ReplacePrayers"
       />
       <Button
         style={{marginVertical: margin}}
         onPress={closeModal}
-        title={<LocalText m="Cancel" />}
+        m="Cancel"
       />
     </View>
     </View>

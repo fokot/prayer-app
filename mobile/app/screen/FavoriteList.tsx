@@ -2,16 +2,18 @@ import React, {useState} from "react";
 import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
-  useFavoritePrayers, reorderFavoritePrayers
+  useFavoritePrayers, reorderFavoritePrayers, useBackgroundColor, useTextColor
 } from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 
 export const FavoriteList = ({navigation: {navigate}}) => {
+  const backgroundColor = useBackgroundColor();
+  const textColor = useTextColor();
   const prayers = useFavoritePrayers();
   const [isOpen, setOpen] = useState(false);
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{backgroundColor, flex: 1 }}>
       {prayers.length > 0 && <DraggableFlatList
           data={prayers}
           renderItem={isOpen ? PrayerListItemOpen : PrayerListItem(navigate)}
@@ -29,7 +31,7 @@ export const FavoriteList = ({navigation: {navigate}}) => {
           name={isOpen ? "md-mail" : "md-mail-open"}
           onPress={() => setOpen(!isOpen)}
           size={64}
-          color="black"
+          color={textColor}
         />
       </View>
     </View>);

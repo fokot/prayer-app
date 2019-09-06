@@ -1,8 +1,8 @@
 import React from "react";
-import {Text} from "react-native";
-import {useMessages} from "../utils/PrayerStore";
+import { useMessages } from "../utils/PrayerStore";
+import {AppText} from "./AppText";
 
 export const LocalText = ({style, m}) => {
   const translate = useMessages();
-  return <Text style={style}>{translate[m]}</Text>
+  return <AppText style={style}>{translate[m]}</AppText>
 }

@@ -6,15 +6,17 @@ import {
   reorderAllPrayers,
   useAllPrayers,
   toggleFavorite,
-  reorderFavoritePrayers
+  reorderFavoritePrayers, useBackgroundColor, useTextColor
 } from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 
 export const AllList = ({navigation: {navigate}}) => {
+  const backgroundColor = useBackgroundColor();
+  const textColor = useTextColor();
   const prayers = useAllPrayers();
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ backgroundColor, flex: 1 }}>
       {prayers.length > 0 && <DraggableFlatList
           data={prayers}
           renderItem={PrayerListItem(navigate)}
@@ -32,7 +34,7 @@ export const AllList = ({navigation: {navigate}}) => {
           name="md-add-circle-outline"
           onPress={() => navigate('PrayerEdit')}
           size={64}
-          color="black"
+          color={textColor}
         />
       </View>
     </View>);

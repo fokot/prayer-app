@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, savePrayer} from "../utils/PrayerStore";
+import {usePrayer, savePrayer, useTextColor, useBackgroundColor} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
 import uuid from 'uuid/v1';
 import {blue} from "../utils/Colors";
@@ -17,21 +17,22 @@ const newPrayer = (): Prayer => ({
 });
 
 export const PrayerEdit = ({navigation}) => {
+    const backgroundColor = useBackgroundColor();
     const id = navigation.getParam('prayerId');
     const initialPrayer = id ? usePrayer(id) : newPrayer();
     const [prayer, setPrayer] = useState(initialPrayer);
+    const textColor = useTextColor();
     return (
-      <View>
+      <View style={{backgroundColor, height: '100%'}}>
         <View
           style={{
-            paddingTop: 32,
-            paddingBottom: 16,
             paddingHorizontal: 16,
             backgroundColor: blue,
-            height: 80,
+            height: 50,
             display: "flex",
             flexDirection: "row",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
           <Icon
@@ -68,7 +69,7 @@ export const PrayerEdit = ({navigation}) => {
           <TextInput
             style={{
               fontWeight: 'bold',
-              color: 'black',
+              color: textColor,
               fontSize: 32,
             }}
             value={prayer.name}
@@ -78,7 +79,7 @@ export const PrayerEdit = ({navigation}) => {
           <TextInput
             style={{
               fontWeight: 'bold',
-              color: 'black',
+              color: textColor,
               fontSize: 32,
             }}
             value={prayer.text}

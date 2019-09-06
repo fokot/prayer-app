@@ -1,7 +1,9 @@
 import React, {Component, useEffect, useState} from "react";
 import {Text, TouchableOpacity, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, toggleFavorite, deletePrayer} from "../utils/PrayerStore";
+import {usePrayer, toggleFavorite, deletePrayer, useBackgroundColor} from "../utils/PrayerStore";
+import {AppText} from "../components/AppText";
+import {blue} from "../utils/Colors";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -10,6 +12,7 @@ const Icon = (props: any) =>
   />;
 
 export const Prayer = ({navigation}) => {
+    const backgroundColor = useBackgroundColor()
     const id = navigation.getParam('prayerId');
     const prayer = usePrayer(id);
     // const [isFavorite, setFavorite] = useState(prayer.favorite);
@@ -25,17 +28,16 @@ export const Prayer = ({navigation}) => {
     //   }
     // );
     return (
-      <View>
+      <View style={{backgroundColor, height: '100%'}}>
         <View
           style={{
-            paddingTop: 32,
-            paddingBottom: 16,
             paddingHorizontal: 16,
-            backgroundColor: '#2196f3',
-            height: 80,
+            backgroundColor: blue,
+            height: 50,
             display: "flex",
             flexDirection: "row",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
           <Icon
@@ -74,18 +76,16 @@ export const Prayer = ({navigation}) => {
             padding: 16
           }}
         >
-          <Text style={{
+          <AppText style={{
             fontWeight: 'bold',
-            color: 'black',
             fontSize: 32,
           }}
-          >{prayer.name}</Text>
+          >{prayer.name}</AppText>
 
-          <Text style={{
+          <AppText style={{
             fontWeight: 'bold',
-            color: 'black',
           }}
-          >{prayer.text}</Text>
+          >{prayer.text}</AppText>
         </View>
 
       </View>

@@ -55,7 +55,7 @@ export enum Language {
 type StoreType = {
   settings: {
     language: Language,
-    darkMode: false
+    darkMode: boolean,
   },
   prayers: {[index: string]: Prayer},
   allPrayerIds: string[],
@@ -77,7 +77,9 @@ const { updateStore, useStore, currentStore } = createStore(initialStore);
 export { useStore, currentStore };
 
 const readAllData = async (): Promise<StoreType> => {
-  const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || {darkMode: false};
+  const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || (
+    {language: 'en', darkMode: false}
+  );
   const allPrayerIds = await dbGetAllPrayerIds();
   const favoritePrayerIds = await AsyncStorage.getItem(FAVORITE_PRAYER_IDS).then(JSON.parse) || [];
   const prayers = await AsyncStorage.multiGet(allPrayerIds).then(x => x.map(p => JSON.parse(p[1])));
@@ -100,9 +102,19 @@ readAllData().then(
 
 const updateStoreMerge = (value: any): StoreType => updateStore(s => mergeDeepRight(s, value));
 
-export const toggleDarkMode = (value: boolean) => {
-  updateStoreMerge({settings: { darkMode: value }});
-}
+const updateSettings = async (f) => {
+  const store = updateStore(s =>
+    ({...s, settings: f(s.settings)})
+  );
+  await AsyncStorage.setItem(SETTINGS, JSON.stringify(store.settings));
+
+};
+
+export const toggleDarkMode = (value: boolean) =>
+  updateSettings(s => ({...s, darkMode: value }));
+
+export const setLanguage = async (language) =>
+  updateSettings(s => ({...s, language }));
 
 export const useBackgroundColor = () => useStore(s => s.settings.darkMode) ? '#181818' : 'white';
 
@@ -222,13 +234,6 @@ const translationGetters = {
   // lazy requires (metro bundler does not support symlinks)
   [Language.en]: () => require("../../assets/translations/en.json"),
   [Language.sk]: () => require("../../assets/translations/sk.json"),
-};
-
-export const setLanguage = async (language) => {
-  const store = updateStore(s =>
-    ({...s, settings: {...s.settings, language, }})
-  );
-  await AsyncStorage.setItem(SETTINGS, JSON.stringify(store.settings));
 };
 
 export const useMessages = () =>

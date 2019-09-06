@@ -2,6 +2,8 @@ import {Text, TouchableOpacity, View} from "react-native";
 import {toggleFavorite} from "../utils/PrayerStore";
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
+import {AppText} from "../components/AppText";
+import {blue} from "../utils/Colors";
 
 export const RenderSeparator = () => (
   <View
@@ -18,8 +20,8 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
   return (
     <TouchableOpacity
       style={{
+        ...( isActive ? {backgroundColor: blue} : {}),
         height: 100,
-        backgroundColor: isActive ? 'blue' : 'white',
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
@@ -28,12 +30,11 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
       onLongPress={move}
       onPressOut={moveEnd}
     >
-      <Text style={{
+      <AppText style={{
         fontWeight: 'bold',
-        color: 'black',
         fontSize: 16,
       }}
-      >{item.name}</Text>
+      >{item.name}</AppText>
       <Ionicons name={item.favorite ? "md-star" : "md-star-outline"}
                 onPress={() => toggleFavorite(item.id)}
                 size={32} color="green" />
@@ -47,16 +48,14 @@ export const PrayerListItemOpen = ({item}) =>
       padding: 16
     }}
   >
-    <Text style={{
+    <AppText style={{
       fontWeight: 'bold',
-      color: 'black',
       fontSize: 32,
     }}
-    >{item.name}</Text>
+    >{item.name}</AppText>
 
-    <Text style={{
+    <AppText style={{
       fontWeight: 'bold',
-      color: 'black',
     }}
-    >{item.text}</Text>
+    >{item.text}</AppText>
   </View>;

@@ -1,8 +1,17 @@
 import React from "react";
 import {Text, TouchableHighlight, View} from "react-native";
 import {blue, blueLight} from "../utils/Colors";
+import {LocalText} from "./LocalText";
 
-export const Button = ({title, onPress, style, fontSize}) =>
+const textStyle = (fontSize) =>
+  ({
+    color: "white",
+    fontSize: fontSize || 18,
+    fontWeight: "bold",
+    textAlign: "center",
+  });
+
+export const Button = ({title, m, onPress, style, fontSize}) =>
   <TouchableHighlight
     style={{...{
       backgroundColor: blue,
@@ -12,12 +21,9 @@ export const Button = ({title, onPress, style, fontSize}) =>
     underlayColor={blueLight}
     onPress={onPress}
   >
-    <Text style={{
-      color: "white",
-      fontSize: fontSize || 18,
-      fontWeight: "bold",
-      textAlign: "center",
-    }}>
-      {title}
-    </Text>
+    {m ?
+      <LocalText style={textStyle(fontSize)} m={m}/>
+      :
+      <Text style={textStyle(fontSize)}>{title}</Text>
+    }
   </TouchableHighlight>;
