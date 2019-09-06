@@ -5,5 +5,7 @@
 set -e
 set -x
 
+cd ../server
+
 docker run --rm -v $(PWD):/app -w /app fpco/stack-build-small:lts-14 stack build server
 

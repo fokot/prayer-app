@@ -1,0 +1,20 @@
+[Unit]
+Description=Prayer app server service
+
+# start service after network is started
+After=network.target
+
+# this will restart service forever
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+
+# this will restart app when it exits with any code
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/usr/bin/prayer-app-server
+
+[Install]
+WantedBy=multi-user.target
