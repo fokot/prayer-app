@@ -41,8 +41,6 @@ const HomeScreen = createMaterialTopTabNavigator(
       style: {
         backgroundColor: blue,
         elevation: 0,
-        borderTopColor: black,
-        borderTopWidth: 1,
       },
       indicatorStyle: {
         backgroundColor: white,

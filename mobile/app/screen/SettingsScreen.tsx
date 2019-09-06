@@ -15,7 +15,7 @@ import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
-import {blue} from "../utils/Colors";
+import {black, blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
 
 const margin = 8;
@@ -50,11 +50,22 @@ export const SettingsScreen = () => {
       </View>
       <View style={{marginVertical: margin}}>
         <LocalText style={{fontSize}} m={'DarkMode'} />
-        <Switch value={darkMode} onValueChange={toggleDarkMode}/>
+        <Switch
+          thumbColor={darkMode ? blue: grey}
+          trackColor={{ true: white, false: greyLight }}
+          value={darkMode}
+          onValueChange={toggleDarkMode}
+        />
       </View>
       <View style={{marginVertical: margin}}>
         <LocalText style={{fontSize}} m="TextSize"/>
-        <Slider value={5} minimumValue={3} maximumValue={30}/>
+        <Slider
+          value={5}
+          minimumTrackTintColor={blue}
+          thumbTintColor={blue}
+          minimumValue={3}
+          maximumValue={30}
+        />
       </View>
       <Button
         style={{marginVertical: 2 * margin}}

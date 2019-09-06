@@ -31,7 +31,7 @@
       "permissions": ["CAMERA"]
     },
     "androidStatusBar": {
-      "backgroundColor": "#2196f3"
+      "backgroundColor": "#092840"
     }
   }
 }
