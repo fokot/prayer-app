@@ -17,7 +17,7 @@
   });
 
   window.app = app;
-  const ws = new ReconnectingWebSocket('ws://' + location.host + '/ws/web');
+  const ws = new ReconnectingWebSocket('wss://' + location.host + '/ws/web');
   // const ws = new ReconnectingWebSocket('ws://localhost:3000/ws/web');
   // const ws = new ReconnectingWebSocket('ws://prayer-app.tk/ws/web');
 

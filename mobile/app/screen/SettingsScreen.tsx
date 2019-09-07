@@ -175,7 +175,7 @@ const Syncing = ({clientId, closeSync}) => {
     () => {
       // const ws = new WebSocket(`ws://192.168.43.6/${clientId}`);
       // const ws = new WebSocket(`ws://192.168.0.26:3000/ws/${clientId}`);
-      const x = `ws://prayer-app.tk/ws/${clientId}`;
+      const x = `wss://prayer-app.tk/ws/${clientId}`;
       // alert(x);
       const ws = new WebSocket(x);
       // const ws = new WebSocket(`ws://prayer-app.tk/${clientId}`);

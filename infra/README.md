@@ -19,6 +19,9 @@ systemctl start prayer-app-server
 systemctl enable prayer-app-server
 ```
 
+## Domain
+`prayer-app.tk` is registered at [freenom.com](https://www.freenom.com)
+
 ## Nginx
 * I set it up with help of this [article](https://medium.com/@jgefroh/a-guide-to-using-nginx-for-static-websites-d96a9d034940)
 * Static files are in `/var/www/prayer-app.tk/`
@@ -27,4 +30,12 @@ and symlinked to `sites-enabled`
 * After making changes to config nginx must be restarted like
 ```bash
 sudo systemctl restart nginx
-``` 
+```
+
+Https is enables via [letsencrypt](https://letsencrypt.org/).
+and renewed like
+```bash
+sudo crontab -e
+Add the following line:
+17 7 * * * certbot renew --post-hook "systemctl reload nginx"
+```
