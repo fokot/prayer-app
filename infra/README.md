@@ -36,6 +36,8 @@ Https is enables via [letsencrypt](https://letsencrypt.org/).
 and renewed like
 ```bash
 sudo crontab -e
+```
 Add the following line:
+```bash
 17 7 * * * certbot renew --post-hook "systemctl reload nginx"
 ```
