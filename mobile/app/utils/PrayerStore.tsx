@@ -82,7 +82,7 @@ export { useStore, currentStore };
 
 const readAllData = async (): Promise<StoreType> => {
   const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || (
-    {language: 'en', darkMode: false}
+    {language: Language.en, darkMode: false}
   );
   const allPrayerIds = await dbGetAllPrayerIds();
   const favoritePrayerIds = await AsyncStorage.getItem(FAVORITE_PRAYER_IDS).then(JSON.parse) || [];
