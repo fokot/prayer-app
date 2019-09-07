@@ -1,10 +1,11 @@
 import React from 'react';
 import {createStackNavigator, createAppContainer} from 'react-navigation';
-import Home from "./screen/Home";
+import {Home} from "./screen/Home";
 import { Prayer } from "./screen/Prayer";
 import {PrayerEdit} from "./screen/PrayerEdit";
 import {useInitialised} from "./utils/PrayerStore";
-import {View} from "react-native";
+import {ActivityIndicator, View} from "react-native";
+import {blue} from "./utils/Colors";
 
 
 const MainNavigator = createStackNavigator({
@@ -15,11 +16,4 @@ const MainNavigator = createStackNavigator({
   headerMode: 'none'
 });
 
-const Container = createAppContainer(MainNavigator);
-
-const Main = () => {
-  const initialised = useInitialised();
-  return initialised ? <Container /> : <View />;
-};
-
-export default Main;
+export const Main = createAppContainer(MainNavigator);

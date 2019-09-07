@@ -6,13 +6,14 @@ import {SettingsScreen} from "./SettingsScreen";
 import {AllList} from "./AllList";
 import {FavoriteList} from "./FavoriteList";
 import {black, blue, blueLight, white} from "../utils/Colors";
+import {currentStore} from "../utils/PrayerStore";
 
 const TabBarIcon = (name) => ({focused, }) =>
   (<Ionicons size={32} name={name} color={focused ? white : black} />);
 
-const Home = createMaterialTopTabNavigator(
+export const Home = createMaterialTopTabNavigator(
   {
-    Favorites: {
+    Favorite: {
       screen: FavoriteList,
       navigationOptions: {
         tabBarIcon: TabBarIcon("md-star")
@@ -33,7 +34,7 @@ const Home = createMaterialTopTabNavigator(
     },
   },
   {
-    initialRouteName: 'Settings',
+    initialRouteName: currentStore().lastTab,
     tabBarOptions: {
       showIcon: true,
       showLabel: false,
@@ -49,6 +50,3 @@ const Home = createMaterialTopTabNavigator(
     },
   }
 );
-
-
-export default Home;

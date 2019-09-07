@@ -3,12 +3,14 @@ import prayers, {Prayer, PrayerFull} from "./Prayers";
 import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, toPairs} from "ramda";
 import {createStore} from "./Store";
 import uuid from 'uuid/v1';
+import {useEffect} from "react";
 
 
 // database keys
 const ALL_PRAYER_IDS = 'ALL_PRAYER_IDS';
 const FAVORITE_PRAYER_IDS = 'FAVORITE_PRAYER_IDS';
 const SETTINGS = 'SETTINGS';
+const LAST_TAB = 'LAST_TAB';
 
 // database functions
 
@@ -47,13 +49,11 @@ const dbDeletePrayer = (id) =>
 //   return  await AsyncStorage.setItem('FavoritesPrayerIds', JSON.stringify([]));
 // }
 
-export enum Language {
-  en,
-  sk,
-}
+type Language = 'en' | 'sk';
 
 type StoreType = {
   initialised: boolean,
+  lastTab: String,
   settings: {
     language: Language,
     darkMode: boolean,
@@ -66,9 +66,10 @@ type StoreType = {
 
 const initialStore: StoreType = {
   initialised: false,
+  lastTab: 'Settings',
   settings: {
     darkMode: false,
-    language: Language.en,
+    language: 'en',
     fontSize: 16,
   },
   prayers: {},
@@ -81,15 +82,16 @@ const { updateStore, useStore, currentStore } = createStore(initialStore);
 export { useStore, currentStore };
 
 const readAllData = async (): Promise<StoreType> => {
+  const lastTab = await AsyncStorage.getItem(LAST_TAB) || 'Settings';
   const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || (
-    {language: Language.en, darkMode: false}
+    {language: 'en', darkMode: false, fontSize: 16}
   );
   const allPrayerIds = await dbGetAllPrayerIds();
   const favoritePrayerIds = await AsyncStorage.getItem(FAVORITE_PRAYER_IDS).then(JSON.parse) || [];
   const prayers = await AsyncStorage.multiGet(allPrayerIds).then(x => x.map(p => JSON.parse(p[1])));
-
   return {
     initialised: true,
+    lastTab,
     settings,
     allPrayerIds,
     favoritePrayerIds,
@@ -114,8 +116,22 @@ const updateSettings = async (f) => {
     ({...s, settings: f(s.settings)})
   );
   await AsyncStorage.setItem(SETTINGS, JSON.stringify(store.settings));
-
 };
+
+/* no need to update it in store, just in db */
+const updateLastTab = (lastTab) =>
+  AsyncStorage.setItem(LAST_TAB, lastTab);
+
+const x = 33;
+
+export const updateLastTabListener = (navigation, tabName) => useEffect(
+  () => {
+    const focusListener = navigation.addListener('didFocus',
+      () => updateLastTab(tabName)
+    );
+    return () => focusListener.remove();
+  }
+);
 
 export const toggleDarkMode = (value: boolean) =>
   updateSettings(s => ({...s, darkMode: value }));
@@ -246,8 +262,8 @@ export const replaceFromWeb = async (prayersFromWeb) => {
 
 const translationGetters = {
   // lazy requires (metro bundler does not support symlinks)
-  [Language.en]: () => require("../../assets/translations/en.json"),
-  [Language.sk]: () => require("../../assets/translations/sk.json"),
+  en: () => require("../../assets/translations/en.json"),
+  sk: () => require("../../assets/translations/sk.json"),
 };
 
 export const useMessages = () =>

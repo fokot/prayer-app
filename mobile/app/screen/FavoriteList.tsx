@@ -1,13 +1,15 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
-  useFavoritePrayers, reorderFavoritePrayers, useBackgroundColor, useTextColor
+  useFavoritePrayers, reorderFavoritePrayers, useBackgroundColor, useTextColor, updateLastTab, updateLastTabListener
 } from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 
-export const FavoriteList = ({navigation: {navigate}}) => {
+export const FavoriteList = ({navigation}) => {
+  const {navigate} = navigation;
+  updateLastTabListener(navigation, 'Favorite');
   const backgroundColor = useBackgroundColor();
   const textColor = useTextColor();
   const prayers = useFavoritePrayers();

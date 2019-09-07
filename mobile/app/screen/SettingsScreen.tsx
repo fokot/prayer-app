@@ -18,7 +18,7 @@ import {
   getCdnPrayers, Language,
   replaceCdnPrayers,
   replaceFromWeb, setFontSize, setLanguage,
-  toggleDarkMode,
+  toggleDarkMode, updateLastTabListener,
   useBackgroundColor, useSettings,
   useStore, useTextColor,
 } from "../utils/PrayerStore";
@@ -32,7 +32,8 @@ import {AppText} from "../components/AppText";
 
 const margin = 8;
 
-export const SettingsScreen = () => {
+export const SettingsScreen = ({navigation}) => {
+  updateLastTabListener(navigation, 'Settings');
   const { language, darkMode, fontSize, }  = useSettings();
   const backgroundColor = useBackgroundColor();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
@@ -57,8 +58,8 @@ export const SettingsScreen = () => {
           style={{color: textColor}}
           itemStyle={{fontSize}}
           onValueChange={setLanguage}>
-          <Picker.Item label="English" value={Language.en}/>
-          <Picker.Item label="Slovak" value={Language.sk}/>
+          <Picker.Item label="English" value="en"/>
+          <Picker.Item label="Slovak" value="sk"/>
         </Picker>
       </View>
       <View style={{marginVertical: margin}}>
