@@ -78,13 +78,13 @@ export const Prayer = ({navigation}) => {
         >
           <AppText style={{
             fontWeight: 'bold',
-            fontSize: 32,
           }}
           >{prayer.name}</AppText>
 
-          <AppText style={{
-            fontWeight: 'bold',
-          }}
+          <AppText
+            style={{
+              paddingTop: 16
+            }}
           >{prayer.text}</AppText>
         </View>
 

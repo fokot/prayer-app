@@ -17,9 +17,9 @@ import {
   currentStore,
   getCdnPrayers, Language,
   replaceCdnPrayers,
-  replaceFromWeb, setLanguage,
+  replaceFromWeb, setFontSize, setLanguage,
   toggleDarkMode,
-  useBackgroundColor,
+  useBackgroundColor, useSettings,
   useStore, useTextColor,
 } from "../utils/PrayerStore";
 import {Ionicons} from '@expo/vector-icons';
@@ -31,10 +31,9 @@ import {LocalText} from "../components/LocalText";
 import {AppText} from "../components/AppText";
 
 const margin = 8;
-const fontSize = 20;
 
 export const SettingsScreen = () => {
-  const { language, darkMode, }  = useStore(s => s.settings);
+  const { language, darkMode, fontSize, }  = useSettings();
   const backgroundColor = useBackgroundColor();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
   const [showSync, setShowSync] = useState(false);
@@ -52,7 +51,7 @@ export const SettingsScreen = () => {
         display: "flex",
         justifyContent: "space-between",
       }}>
-        <LocalText style={{fontSize}} m="Language" />
+        <LocalText m="Language" />
         <Picker
           selectedValue={language}
           style={{color: textColor}}
@@ -63,7 +62,7 @@ export const SettingsScreen = () => {
         </Picker>
       </View>
       <View style={{marginVertical: margin}}>
-        <LocalText style={{fontSize}} m={'DarkMode'} />
+        <LocalText m={'DarkMode'} />
         <Switch
           thumbColor={darkMode ? blue: grey}
           trackColor={{ true: white, false: greyLight }}
@@ -72,12 +71,13 @@ export const SettingsScreen = () => {
         />
       </View>
       <View style={{marginVertical: margin}}>
-        <LocalText style={{fontSize}} m="TextSize"/>
+        <LocalText m="TextSize"/>
         <Slider
-          value={5}
+          value={fontSize}
+          onValueChange={setFontSize}
           minimumTrackTintColor={blue}
           thumbTintColor={blue}
-          minimumValue={3}
+          minimumValue={10}
           maximumValue={30}
         />
       </View>
@@ -90,7 +90,6 @@ export const SettingsScreen = () => {
       <AppText
         style={{
           marginTop: 2 * margin,
-          fontSize,
         }}
       >
         <LocalText
@@ -104,7 +103,7 @@ export const SettingsScreen = () => {
         m="EditInBrowser"
         color="#841584"
       />
-      <LocalText style={{fontSize}} m="EditEnd" />
+      <LocalText m="EditEnd" />
       <Modal
         animationType="slide"
         transparent={false}

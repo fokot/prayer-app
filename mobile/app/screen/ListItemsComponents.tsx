@@ -32,7 +32,6 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
     >
       <AppText style={{
         fontWeight: 'bold',
-        fontSize: 16,
       }}
       >{item.name}</AppText>
       <Ionicons name={item.favorite ? "md-star" : "md-star-outline"}
@@ -50,12 +49,10 @@ export const PrayerListItemOpen = ({item}) =>
   >
     <AppText style={{
       fontWeight: 'bold',
-      fontSize: 32,
     }}
     >{item.name}</AppText>
 
     <AppText style={{
-      fontWeight: 'bold',
-    }}
-    >{item.text}</AppText>
+      paddingTop: 16
+    }}>{item.text}</AppText>
   </View>;

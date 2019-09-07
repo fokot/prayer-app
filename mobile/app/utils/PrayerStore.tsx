@@ -57,6 +57,7 @@ type StoreType = {
   settings: {
     language: Language,
     darkMode: boolean,
+    fontSize: number,
   },
   prayers: {[index: string]: Prayer},
   allPrayerIds: string[],
@@ -68,6 +69,7 @@ const initialStore: StoreType = {
   settings: {
     darkMode: false,
     language: Language.en,
+    fontSize: 16,
   },
   prayers: {},
   allPrayerIds: [],
@@ -121,9 +123,16 @@ export const toggleDarkMode = (value: boolean) =>
 export const setLanguage = async (language) =>
   updateSettings(s => ({...s, language }));
 
+export const setFontSize = async (fontSize) =>
+  updateSettings(s => ({...s, fontSize}));
+
 export const useBackgroundColor = () => useStore(s => s.settings.darkMode) ? '#181818' : 'white';
 
-export const useTextColor = () => useStore(s => s.settings.darkMode) ? 'white' : 'black';
+export const textColor = (darkMode) => darkMode ? 'white' : 'black';
+
+export const useTextColor = () => textColor(useStore(s => s.settings.darkMode));
+
+export const useSettings = () => useStore(s => s.settings);
 
 export const reorderAllPrayers = async (prayers: Prayer[]) => {
   const store = updateStoreMerge( { allPrayerIds: prayers.map(p => p.id) });
