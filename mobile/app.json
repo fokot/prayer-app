@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -24,11 +24,13 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fokot.prayerApp"
     },
     "android": {
       "package": "com.fokot.prayerApp",
-      "permissions": ["CAMERA"]
+      "permissions": [],
+      "versionCode": 2
     },
     "androidStatusBar": {
       "backgroundColor": "#092840"
