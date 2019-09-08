@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Main</title>
   <script src="main.js"></script>
-  <!-- reconnecting-websocket-iife.min from https://github.com/pladaria/reconnecting-websocket  -->
-  <script src="reconnecting-websocket-iife.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.css" />
 </head>
 
@@ -16,14 +14,24 @@
     node: document.getElementById('elm')
   });
 
-  window.app = app;
-  const ws = new ReconnectingWebSocket('wss://' + location.host + '/ws/web');
-  // const ws = new ReconnectingWebSocket('ws://localhost:3000/ws/web');
-  // const ws = new ReconnectingWebSocket('ws://prayer-app.tk/ws/web');
+  let ws = null;
+
+  // reconnecting websocket
+  const connect = () => {
+    ws = new WebSocket('wss://' + location.host + '/ws/web');
+    // ws = new WebSocket('ws://localhost:3000/ws/web');
+    ws.onclose = () => {
+      app.ports.wsReceive.send("closed");
+      setTimeout(connect, 2000);
+    };
+    ws.onerror = ws.close;
+    ws.onmessage = ({data}) => app.ports.wsReceive.send(JSON.parse(data));
+
+  };
+  connect();
 
   app.ports.wsSend.subscribe(data => ws.send(JSON.stringify(data)));
-  ws.onmessage = ({data}) => app.ports.wsReceive.send(JSON.parse(data));
-  ws.onclose = () => app.ports.wsReceive.send("closed");
+
   app.ports.errorLog.subscribe(data => console.error(data));
 </script>
 </body>
