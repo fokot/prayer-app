@@ -16,3 +16,8 @@ Add types for ramda like
 ```bash
 yarn add  @types/ramda
 ``` 
+
+Check typescript errors like
+```bash
+yarn run tsc
+```
