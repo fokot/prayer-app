@@ -1,5 +1,5 @@
 import React, {Component, useEffect, useState} from "react";
-import {Text, TouchableOpacity, View} from "react-native";
+import {ScrollView, Text, TouchableOpacity, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import {usePrayer, toggleFavorite, deletePrayer, useBackgroundColor} from "../utils/PrayerStore";
 import {AppText} from "../components/AppText";
@@ -71,7 +71,7 @@ export const Prayer = ({navigation}) => {
             />
           </View>
         </View>
-        <View
+        <ScrollView
           style={{
             padding: 16
           }}
@@ -86,7 +86,7 @@ export const Prayer = ({navigation}) => {
               paddingTop: 16
             }}
           >{prayer.text}</AppText>
-        </View>
+        </ScrollView>
 
       </View>
     )

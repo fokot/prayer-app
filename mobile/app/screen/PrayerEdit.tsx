@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {TextInput, View} from "react-native";
+import {ScrollView, TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import {usePrayer, savePrayer, useTextColor, useBackgroundColor} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
@@ -61,7 +61,7 @@ export const PrayerEdit = ({navigation}) => {
             />
           </View>
         </View>
-        <View
+        <ScrollView
           style={{
             padding: 16
           }}
@@ -88,7 +88,7 @@ export const PrayerEdit = ({navigation}) => {
             numberOfLines={10}
             onChangeText={(text) => setPrayer({...prayer, text: text})}
           />
-        </View>
+        </ScrollView>
 
       </View>
     )
