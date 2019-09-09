@@ -1,10 +1,21 @@
 import {AsyncStorage} from 'react-native';
-import prayers, {Prayer, PrayerFull} from "./Prayers";
-import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, toPairs} from "ramda";
+import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, prepend, toPairs} from "ramda";
 import {createStore} from "./Store";
 import uuid from 'uuid/v1';
 import {useEffect} from "react";
 
+// types
+type ID = string;
+
+export interface Prayer {
+  id: ID,
+  name: string,
+  text: string,
+}
+
+export interface PrayerFull extends Prayer {
+  favorite: boolean,
+}
 
 // database keys
 const ALL_PRAYER_IDS = 'ALL_PRAYER_IDS';
@@ -189,7 +200,7 @@ export const savePrayer = async (prayer: Prayer) => {
     s => ({
       ...s,
       prayers: assoc(prayer.id, prayer, s.prayers),
-      allPrayerIds: s.allPrayerIds.includes(prayer.id) ? s.allPrayerIds : append(prayer.id, s.allPrayerIds),
+      allPrayerIds: s.allPrayerIds.includes(prayer.id) ? s.allPrayerIds : prepend(prayer.id, s.allPrayerIds),
     })
   );
   await dbSavePrayer(prayer);
