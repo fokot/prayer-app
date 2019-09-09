@@ -11,5 +11,6 @@
   "ReplacePrayers": "Replace prayers",
   "Cancel": "Cancel",
   "Name": "Name",
-  "Text": "Text"
+  "Text": "Text",
+  "NoName": "Name must be set"
 }

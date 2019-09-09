@@ -11,5 +11,6 @@
   "ReplacePrayers": "Prepísať modlitby",
   "Cancel": "Zrušiť",
   "Name": "Názov",
-  "Text": "Text"
+  "Text": "Text",
+  "NoName": "Názov je povinný"
 }

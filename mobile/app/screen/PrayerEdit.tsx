@@ -56,8 +56,12 @@ export const PrayerEdit = ({navigation}) => {
             <Icon
               name="md-checkmark"
               onPress={() => {
-                savePrayer(prayer);
-                navigation.goBack();
+                if(prayer.name && prayer.name.length > 0) {
+                  savePrayer(prayer);
+                  navigation.goBack();
+                } else {
+                  alert(translate['NoName'])
+                }
               }}
             />
           </View>
