@@ -2,20 +2,20 @@ import React, {useEffect, useState} from "react";
 import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
-  useFavoritePrayers, reorderFavoritePrayers, useBackgroundColor, useTextColor, updateLastTab, updateLastTabListener
+  useFavoritePrayers, reorderFavoritePrayers, useTextColor, updateLastTab, updateLastTabListener
 } from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
+import {Background} from "../components/Background";
 
 export const FavoriteList = ({navigation}) => {
   const {navigate} = navigation;
   updateLastTabListener(navigation, 'Favorite');
-  const backgroundColor = useBackgroundColor();
   const textColor = useTextColor();
   const prayers = useFavoritePrayers();
   const [isOpen, setOpen] = useState(false);
   return (
-    <View style={{backgroundColor, flex: 1 }}>
+    <Background>
       {prayers.length > 0 && <DraggableFlatList
           data={prayers}
           renderItem={isOpen ? PrayerListItemOpen : PrayerListItem(navigate)}
@@ -36,5 +36,5 @@ export const FavoriteList = ({navigation}) => {
           color={textColor}
         />
       </View>
-    </View>);
+    </Background>);
 };

@@ -1,9 +1,10 @@
 import React, {Component, useEffect, useState} from "react";
-import {ScrollView, Text, TouchableOpacity, View} from "react-native";
+import {ScrollView, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, toggleFavorite, deletePrayer, useBackgroundColor} from "../utils/PrayerStore";
+import {usePrayer, toggleFavorite, deletePrayer} from "../utils/PrayerStore";
 import {AppText} from "../components/AppText";
 import {blue} from "../utils/Colors";
+import {Background} from "../components/Background";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -12,7 +13,6 @@ const Icon = (props: any) =>
   />;
 
 export const Prayer = ({navigation}) => {
-    const backgroundColor = useBackgroundColor()
     const id = navigation.getParam('prayerId');
     const prayer = usePrayer(id);
     // const [isFavorite, setFavorite] = useState(prayer.favorite);
@@ -28,7 +28,7 @@ export const Prayer = ({navigation}) => {
     //   }
     // );
     return (
-      <View style={{backgroundColor, height: '100%'}}>
+      <Background>
         <View
           style={{
             paddingHorizontal: 16,
@@ -88,7 +88,7 @@ export const Prayer = ({navigation}) => {
           >{prayer.text}</AppText>
         </ScrollView>
 
-      </View>
+      </Background>
     )
 };
 

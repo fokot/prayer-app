@@ -19,8 +19,7 @@ import {
   replaceCdnPrayers,
   replaceFromWeb, setFontSize, setLanguage,
   toggleDarkMode, updateLastTabListener,
-  useBackgroundColor, useSettings,
-  useStore, useTextColor,
+  useSettings, useTextColor,
 } from "../utils/PrayerStore";
 import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
@@ -29,103 +28,102 @@ import * as Permissions from 'expo-permissions';
 import {blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
 import {AppText} from "../components/AppText";
+import {Background} from "../components/Background";
 
 const margin = 8;
 
 export const SettingsScreen = ({navigation}) => {
   updateLastTabListener(navigation, 'Settings');
   const { language, darkMode, fontSize, }  = useSettings();
-  const backgroundColor = useBackgroundColor();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
   const [showSync, setShowSync] = useState(false);
   const closeModal = () => setShowPrayersPicker(false);
   const textColor = useTextColor();
   return (
-    <ScrollView
-      style={{
-        backgroundColor,
-        paddingHorizontal: margin,
-      }}
-    >
-      <View style={{
-        marginVertical: margin,
-        display: "flex",
-        justifyContent: "space-between",
-      }}>
-        <LocalText m="Language" />
-        <Picker
-          selectedValue={language}
-          style={{color: textColor}}
-          itemStyle={{fontSize}}
-          onValueChange={setLanguage}>
-          <Picker.Item label="English" value="en"/>
-          <Picker.Item label="Slovak" value="sk"/>
-        </Picker>
-      </View>
-      <View style={{marginVertical: margin}}>
-        <LocalText m={'DarkMode'} />
-        <Switch
-          thumbColor={darkMode ? blue: grey}
-          trackColor={{ true: white, false: greyLight }}
-          value={darkMode}
-          onValueChange={toggleDarkMode}
-        />
-      </View>
-      <View style={{marginVertical: margin}}>
-        <LocalText m="TextSize"/>
-        <Slider
-          value={fontSize}
-          onValueChange={setFontSize}
-          minimumTrackTintColor={blue}
-          thumbTintColor={blue}
-          minimumValue={10}
-          maximumValue={30}
-        />
-      </View>
-      <Button
-        style={{marginVertical: 2 * margin}}
-        onPress={() => setShowPrayersPicker(true)}
-        m="LoadPrayers"
-        color="#841584"
-      />
-      <AppText
+    <Background>
+      <ScrollView
         style={{
-          marginTop: 2 * margin,
+          paddingHorizontal: margin,
         }}
       >
-        <LocalText
-          m="EditStart"
+        <View style={{
+          marginVertical: margin,
+          display: "flex",
+          justifyContent: "space-between",
+        }}>
+          <LocalText m="Language" />
+          <Picker
+            selectedValue={language}
+            style={{color: textColor}}
+            itemStyle={{fontSize}}
+            onValueChange={setLanguage}>
+            <Picker.Item label="English" value="en"/>
+            <Picker.Item label="Slovak" value="sk"/>
+          </Picker>
+        </View>
+        <View style={{marginVertical: margin}}>
+          <LocalText m={'DarkMode'} />
+          <Switch
+            thumbColor={darkMode ? blue: grey}
+            trackColor={{ true: white, false: greyLight }}
+            value={darkMode}
+            onValueChange={toggleDarkMode}
+          />
+        </View>
+        <View style={{marginVertical: margin}}>
+          <LocalText m="TextSize"/>
+          <Slider
+            value={fontSize}
+            onValueChange={setFontSize}
+            minimumTrackTintColor={blue}
+            thumbTintColor={blue}
+            minimumValue={10}
+            maximumValue={30}
+          />
+        </View>
+        <Button
+          style={{marginVertical: 2 * margin}}
+          onPress={() => setShowPrayersPicker(true)}
+          m="LoadPrayers"
+          color="#841584"
         />
-        <AppText style={{fontWeight: "bold"}}>prayer-app.tk</AppText>
-        <LocalText m="EditMiddle" />
-      </AppText>
-      <Button
-        onPress={() => setShowSync(true)}
-        m="EditInBrowser"
-        color="#841584"
-      />
-      <LocalText m="EditEnd" />
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={showPrayersPicker}
-        onRequestClose={closeModal}>
-        <PrayerModal closeModal={closeModal}/>
-      </Modal>
-      <Modal
-        animationType="slide"
-        transparent={false}
-        visible={showSync}
-        onRequestClose={() => setShowSync(false)}>
-        <Sync closeSync={() => setShowSync(false)}/>
-      </Modal>
-    </ScrollView>
+        <AppText
+          style={{
+            marginTop: 2 * margin,
+          }}
+        >
+          <LocalText
+            m="EditStart"
+          />
+          <AppText style={{fontWeight: "bold"}}>prayer-app.tk</AppText>
+          <LocalText m="EditMiddle" />
+        </AppText>
+        <Button
+          onPress={() => setShowSync(true)}
+          m="EditInBrowser"
+          color="#841584"
+        />
+        <LocalText m="EditEnd" />
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={showPrayersPicker}
+          onRequestClose={closeModal}>
+          <PrayerModal closeModal={closeModal}/>
+        </Modal>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={showSync}
+          onRequestClose={() => setShowSync(false)}>
+          <Sync closeSync={() => setShowSync(false)}/>
+        </Modal>
+      </ScrollView>
+    </Background>
   )
 };
 
 const Sync = ({closeSync}) => {
-
-  const backgroundColor = useBackgroundColor();
   const [clientId, setClientId] = useState(null);
   const [hasCameraPermission, setCameraPermission] = useState(null);
 
@@ -152,9 +150,7 @@ const Sync = ({closeSync}) => {
   }
 
   return (
-    <View style={{
-      backgroundColor,
-      height: '100%',
+    <Background style={{
       flex: 1,
       flexDirection: 'column',
       justifyContent: 'flex-end',
@@ -167,7 +163,7 @@ const Sync = ({closeSync}) => {
         }}
         style={StyleSheet.absoluteFillObject}
       />
-    </View>
+    </Background>
   );
 }
 
@@ -211,17 +207,15 @@ const Syncing = ({clientId, closeSync}) => {
     }
   );
 
-  const backgroundColor = useBackgroundColor()
   return (
-    <View style={{backgroundColor, height: '100%'}}>
-      <AppText>Syncing...{clientId}</AppText>
-    </View>
+    <Background>
+      <AppText>Syncing ({clientId}) ...</AppText>
+    </Background>
   );
 }
 
 const PrayerModal = ({closeModal}) => {
   const [prayers, setPrayers] = useState([]);
-  const backgroundColor = useBackgroundColor();
   useEffect(
     () => {
       getCdnPrayers().then(setPrayers);
@@ -231,7 +225,7 @@ const PrayerModal = ({closeModal}) => {
   );
   const [selectedPrayer, setSelectedPrayer] = useState(null);
   return (
-    <View style={{backgroundColor, padding: margin, height: '100%'}}>
+    <Background style={{padding: margin}}>
       {selectedPrayer ?
         <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
         <View>
@@ -249,7 +243,7 @@ const PrayerModal = ({closeModal}) => {
           }
         </View>
       }
-    </View>
+    </Background>
   );
 }
 
@@ -267,10 +261,8 @@ const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
     </TouchableOpacity>
 );
 
-const SelectedPrayer = ({prayer: {name, file}, closeModal}) => {
-  const backgroundColor = useBackgroundColor();
-  return (
-  <View style={{backgroundColor, height: '100%', width: '100%'}}>
+const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
+  <Background style={{width: '100%'}}>
     <Ionicons name="md-close"
               onPress={closeModal}
               size={32} color={blue}/>
@@ -315,5 +307,5 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => {
       />
     </View>
     </View>
-  </View>
-)}
+  </Background>
+);

@@ -1,10 +1,11 @@
 import React, {useState} from "react";
 import {ScrollView, TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, savePrayer, useTextColor, useBackgroundColor, useMessages} from "../utils/PrayerStore";
+import {usePrayer, savePrayer, useTextColor, useMessages} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
 import uuid from 'uuid/v1';
 import {blue} from "../utils/Colors";
+import {Background} from "../components/Background";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -18,13 +19,12 @@ const newPrayer = (): Prayer => ({
 
 export const PrayerEdit = ({navigation}) => {
     const translate = useMessages();
-    const backgroundColor = useBackgroundColor();
     const id = navigation.getParam('prayerId');
     const initialPrayer = id ? usePrayer(id) : newPrayer();
     const [prayer, setPrayer] = useState(initialPrayer);
     const textColor = useTextColor();
     return (
-      <View style={{backgroundColor, height: '100%'}}>
+      <Background>
         <View
           style={{
             paddingHorizontal: 16,
@@ -91,7 +91,7 @@ export const PrayerEdit = ({navigation}) => {
           />
         </ScrollView>
 
-      </View>
+      </Background>
     )
 };
 
