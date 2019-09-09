@@ -9,5 +9,7 @@
   "EditEnd": "a naskenuj QR kód.",
   "AddPrayers": "Pridať modlitby",
   "ReplacePrayers": "Prepísať modlitby",
-  "Cancel": "Zrušiť"
+  "Cancel": "Zrušiť",
+  "Name": "Názov",
+  "Text": "Text"
 }

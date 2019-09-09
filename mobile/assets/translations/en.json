@@ -9,5 +9,7 @@
   "EditEnd": "and scan the QR code.",
   "AddPrayers": "Add prayers",
   "ReplacePrayers": "Replace prayers",
-  "Cancel": "Cancel"
+  "Cancel": "Cancel",
+  "Name": "Name",
+  "Text": "Text"
 }

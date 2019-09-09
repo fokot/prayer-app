@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {ScrollView, TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, savePrayer, useTextColor, useBackgroundColor} from "../utils/PrayerStore";
+import {usePrayer, savePrayer, useTextColor, useBackgroundColor, useMessages} from "../utils/PrayerStore";
 import {Prayer} from "../utils/Prayers";
 import uuid from 'uuid/v1';
 import {blue} from "../utils/Colors";
@@ -17,6 +17,7 @@ const newPrayer = (): Prayer => ({
 });
 
 export const PrayerEdit = ({navigation}) => {
+    const translate = useMessages();
     const backgroundColor = useBackgroundColor();
     const id = navigation.getParam('prayerId');
     const initialPrayer = id ? usePrayer(id) : newPrayer();
@@ -73,7 +74,7 @@ export const PrayerEdit = ({navigation}) => {
               fontSize: 32,
             }}
             value={prayer.name}
-            placeholder={'Prayers name'}
+            placeholder={translate['Name']}
             onChangeText={(text) => setPrayer({...prayer, name: text})}
           />
           <TextInput
@@ -83,7 +84,7 @@ export const PrayerEdit = ({navigation}) => {
               fontSize: 32,
             }}
             value={prayer.text}
-            placeholder={'Prayers text'}
+            placeholder={translate['Text']}
             multiline={true}
             numberOfLines={10}
             onChangeText={(text) => setPrayer({...prayer, text: text})}
