@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {ScrollView, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import {usePrayer, toggleFavorite, deletePrayer, NavigationProps} from "../utils/PrayerStore";
@@ -12,21 +12,20 @@ const Icon = (props: any) =>
             {...props}
   />;
 
+
 export const Prayer = ({navigation}: NavigationProps) => {
     const id = navigation.getParam('prayerId');
     const prayer = usePrayer(id);
-    // const [isFavorite, setFavorite] = useState(prayer.favorite);
-    // useEffect(
-    //   () => {
-    //     alert(`start: ${prayer.favorite}, ${isFavorite}`);
-    //     return function cleanup () {
-    //         alert(`toggle: ${prayer.favorite}, ${isFavorite}`);
-    //       if(prayer.favorite != isFavorite){
-    //         // toggleFavorite(prayer.id)
-    //       }
-    //     }
-    //   }
-    // );
+    const [isFavorite, setFavorite] = useState(prayer.favorite);
+    useEffect(
+      () => {
+        return function cleanup () {
+          if(prayer.favorite != isFavorite && !navigation.isFocused()){
+            toggleFavorite(prayer.id);
+          }
+        }
+      }
+    );
     return (
       <Background>
         <View
@@ -65,9 +64,8 @@ export const Prayer = ({navigation}: NavigationProps) => {
               onPress={() => navigation.navigate('PrayerEdit', {prayerId: id})}
             />
             <Icon
-              name={prayer.favorite ? "md-star" : "md-star-outline"}
-              // onPress={() => setFavorite(!isFavorite)}
-              onPress={() => toggleFavorite(prayer.id)}
+              name={isFavorite ? "md-star" : "md-star-outline"}
+              onPress={() => setFavorite(!isFavorite)}
             />
           </View>
         </View>
