@@ -28,6 +28,7 @@ import {blue, grey, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
 import {AppText} from "../components/AppText";
 import {Background} from "../components/Background";
+import version from "../version.json";
 
 const margin = 8;
 
@@ -111,6 +112,11 @@ export const SettingsScreen = ({navigation}: NavigationProps) => {
           m="EditInBrowser"
         />
         <LocalText m="EditEnd" />
+        <AppText
+          style={{
+            marginTop: 8 * margin,
+          }}
+        >Version: {version}</AppText>
         <Modal
           animationType="slide"
           transparent={false}
