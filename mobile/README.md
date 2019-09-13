@@ -14,7 +14,7 @@ expo build:ios
 
 Add types for ramda like
 ```bash
-yarn add  @types/ramda
+yarn add @types/ramda
 ``` 
 
 Check typescript errors like

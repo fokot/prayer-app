@@ -3,6 +3,9 @@ import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, prepe
 import {createStore} from "./Store";
 import uuid from 'uuid/v1';
 import {useEffect} from "react";
+import {NavigationParams, NavigationScreenProp, NavigationState} from "react-navigation";
+import { Pick } from 'ts-toolbelt/out/types/src/Object/_api';
+import {T} from "ts-toolbelt";
 
 // types
 type ID = string;
@@ -17,6 +20,13 @@ export interface PrayerFull extends Prayer {
   favorite: boolean,
 }
 
+export type TabName = 'All' | 'Favorite' | 'Settings';
+
+export type Language = 'en' | 'sk';
+
+export type Navigation = NavigationScreenProp<NavigationState, NavigationParams>;
+export type NavigationProps = { navigation: Navigation };
+
 // database keys
 const ALL_PRAYER_IDS = 'ALL_PRAYER_IDS';
 const FAVORITE_PRAYER_IDS = 'FAVORITE_PRAYER_IDS';
@@ -25,46 +35,32 @@ const LAST_TAB = 'LAST_TAB';
 
 // database functions
 
-const dbGetAllPrayerIds = () => AsyncStorage.getItem(ALL_PRAYER_IDS).then(JSON.parse).then(
-  ids => ids || []
-);
+const getAndParse = <A,>(key: string, defaultVal: A): Promise<A> =>
+  (AsyncStorage.getItem(key).then(x => x ? JSON.parse(x) : defaultVal)) as Promise<A>;
 
+const dbGetAllPrayerIds = () => getAndParse<Array<ID>>(ALL_PRAYER_IDS, []);
 
-const dbSetAllPrayerIds = (ids) =>
+const dbSetAllPrayerIds = (ids: Array<ID>) =>
   AsyncStorage.setItem(ALL_PRAYER_IDS, JSON.stringify(ids));
 
-const dbGetFavoritePrayerIds = () =>
-  AsyncStorage.getItem(FAVORITE_PRAYER_IDS).then(JSON.parse).then(
-    ids => ids || []
-  );
-
-const dbSetFavoritePrayerIds = (ids) =>
+const dbSetFavoritePrayerIds = (ids: Array<ID>) =>
   AsyncStorage.setItem(FAVORITE_PRAYER_IDS, JSON.stringify(ids));
 
-const dbSavePrayer = (prayer) =>
+const dbSavePrayer = (prayer: Prayer) =>
   AsyncStorage.setItem(prayer.id, JSON.stringify(prayer));
 
-const dbSavePrayers = (prayerPairs) =>
+const dbSavePrayers = (prayerPairs: Array<[string, Prayer]>) =>
   AsyncStorage.multiSet(prayerPairs.map(p => [p[0], JSON.stringify(p[1])]));
 
-const dbDeletePrayers = (ids) =>
+const dbDeletePrayers = (ids: Array<ID>) =>
   AsyncStorage.multiRemove(ids);
 
-const dbDeletePrayer = (id) =>
+const dbDeletePrayer = (id: ID) =>
   AsyncStorage.removeItem(id);
-
-// export const storeEveryting = async (prayers) => {
-//   const prayerIds = prayers.map(p => p.id);
-//   await AsyncStorage.multiSet(prayers.map(p => [p.id, JSON.stringify(p)]));
-//   await AsyncStorage.setItem('AllPrayerIds', JSON.stringify(prayerIds));
-//   return  await AsyncStorage.setItem('FavoritesPrayerIds', JSON.stringify([]));
-// }
-
-type Language = 'en' | 'sk';
 
 type StoreType = {
   initialised: boolean,
-  lastTab: String,
+  lastTab: TabName,
   settings: {
     language: Language,
     darkMode: boolean,
@@ -74,6 +70,8 @@ type StoreType = {
   allPrayerIds: string[],
   favoritePrayerIds: string[],
 }
+
+type SettingsType = StoreType['settings'];
 
 const initialStore: StoreType = {
   initialised: false,
@@ -93,12 +91,12 @@ const { updateStore, useStore, currentStore } = createStore(initialStore);
 export { useStore, currentStore };
 
 const readAllData = async (): Promise<StoreType> => {
-  const lastTab = await AsyncStorage.getItem(LAST_TAB) || 'Settings';
-  const settings = await AsyncStorage.getItem(SETTINGS).then(JSON.parse) || (
+  const lastTab = await AsyncStorage.getItem(LAST_TAB) as TabName || 'Settings';
+  const settings = await getAndParse<SettingsType>(SETTINGS,
     {language: 'en', darkMode: false, fontSize: 16}
   );
   const allPrayerIds = await dbGetAllPrayerIds();
-  const favoritePrayerIds = await AsyncStorage.getItem(FAVORITE_PRAYER_IDS).then(JSON.parse) || [];
+  const favoritePrayerIds = await getAndParse<Array<ID>>(FAVORITE_PRAYER_IDS, []);
   const prayers = await AsyncStorage.multiGet(allPrayerIds).then(x => x.map(p => JSON.parse(p[1])));
   return {
     initialised: true,
@@ -120,9 +118,13 @@ readAllData().then(
 
 // exported functions which update reactive store as well as database
 
-const updateStoreMerge = (value: any): StoreType => updateStore(s => mergeDeepRight(s, value));
 
-const updateSettings = async (f) => {
+type PartialAll<T> = T extends object ? { [K in keyof T]?: PartialAll<T[K]> } : T;
+
+// @ts-ignore
+const updateStoreMerge = (value: PartialAll<StoreType>): StoreType => updateStore(s => mergeDeepRight(s, value));
+
+const updateSettings = async (f: (arg: SettingsType) => SettingsType) => {
   const store = updateStore(s =>
     ({...s, settings: f(s.settings)})
   );
@@ -130,12 +132,10 @@ const updateSettings = async (f) => {
 };
 
 /* no need to update it in store, just in db */
-const updateLastTab = (lastTab) =>
+const updateLastTab = (lastTab: TabName) =>
   AsyncStorage.setItem(LAST_TAB, lastTab);
 
-const x = 33;
-
-export const updateLastTabListener = (navigation, tabName) => useEffect(
+export const updateLastTabListener = (navigation: Navigation, tabName: TabName) => useEffect(
   () => {
     const focusListener = navigation.addListener('didFocus',
       () => updateLastTab(tabName)
@@ -147,33 +147,33 @@ export const updateLastTabListener = (navigation, tabName) => useEffect(
 export const toggleDarkMode = (value: boolean) =>
   updateSettings(s => ({...s, darkMode: value }));
 
-export const setLanguage = async (language) =>
+export const setLanguage = async (language: Language) =>
   updateSettings(s => ({...s, language }));
 
-export const setFontSize = async (fontSize) =>
+export const setFontSize = async (fontSize: number) =>
   updateSettings(s => ({...s, fontSize}));
 
 export const useBackgroundColor = () => useStore(s => s.settings.darkMode) ? '#181818' : 'white';
 
-export const textColor = (darkMode) => darkMode ? 'white' : 'black';
+export const textColor = (darkMode: boolean) => darkMode ? 'white' : 'black';
 
 export const useTextColor = () => textColor(useStore(s => s.settings.darkMode));
 
 export const useSettings = () => useStore(s => s.settings);
 
-export const reorderAllPrayers = async (prayers: Prayer[]) => {
-  const store = updateStoreMerge( { allPrayerIds: prayers.map(p => p.id) });
+export const reorderAllPrayers = async (prayers: readonly PrayerFull[] | null) => {
+  const store = updateStoreMerge( { allPrayerIds: (prayers || []).map(p => p.id) });
   await dbSetAllPrayerIds(store.allPrayerIds);
 }
 
-export const reorderFavoritePrayers = async (prayers: Prayer[]) => {
-  const store = updateStoreMerge( { favoritePrayerIds: prayers.map(p => p.id) });
+export const reorderFavoritePrayers = async (prayers: readonly PrayerFull[] | null) => {
+  const store = updateStoreMerge( { favoritePrayerIds: (prayers || []).map(p => p.id) });
   await dbSetFavoritePrayerIds(store.favoritePrayerIds);
 }
 
 export const useAllPrayers = (): PrayerFull[] => useStore(s => s.allPrayerIds.map(id => ({...s.prayers[id], favorite: s.favoritePrayerIds.includes(id)})))
 
-export const toggleFavorite = async (id) => {
+export const toggleFavorite = async (id: ID) => {
   const store = updateStore(s =>
     ({...s, favoritePrayerIds: s.favoritePrayerIds.includes(id) ?
         without([id], s.favoritePrayerIds) : append(id, s.favoritePrayerIds)})
@@ -221,12 +221,12 @@ const STORAGE_PATH = 'https://storage.googleapis.com/prayer-app/prayers/';
 export const getCdnPrayers = () =>
   fetch(`${STORAGE_PATH}all.json`).then(x => x.json());
 
-const loadCdnPrayers = (fileName) =>
+const loadCdnPrayers = (fileName: string): Promise<Array<{name: string, text: string}>> =>
   fetch(`${STORAGE_PATH}${fileName}`).then(x => x.json());
 
-export const addCdnPrayers = async (fileName) => {
+export const addCdnPrayers = async (fileName: string) => {
   const prayers = await loadCdnPrayers(fileName);
-  const toPair = (p) => {
+  const toPair = <A,>(p: A): [string, A & {id: string}] => {
     const id = uuid();
     return [id, ({...p, id})];
   };
@@ -242,9 +242,9 @@ export const addCdnPrayers = async (fileName) => {
   await dbSetAllPrayerIds(store.allPrayerIds);
 };
 
-const replacePrayers = async (prayers, favoritePrayerIds) => {
+const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<ID>) => {
   const idsToDelete = currentStore().allPrayerIds;
-  const pairs = prayers.map(p => [p.id, p]);
+  const pairs: Array<[string, Prayer]> = prayers.map(p => [p.id, p]);
   const store = updateStore(
     s => ({
       ...s,
@@ -259,13 +259,13 @@ const replacePrayers = async (prayers, favoritePrayerIds) => {
   await dbSetFavoritePrayerIds(favoritePrayerIds);
 };
 
-export const replaceCdnPrayers = async (fileName) => {
+export const replaceCdnPrayers = async (fileName: string) => {
   const prayersFromCdn = await loadCdnPrayers(fileName);
   const prayers = prayersFromCdn.map(p => ({...p, id: uuid()}));
   await replacePrayers(prayers, []);
 };
 
-export const replaceFromWeb = async (prayersFromWeb) => {
+export const replaceFromWeb = async (prayersFromWeb: Array<PrayerFull>) => {
   const prayers = prayersFromWeb.map(({favorite, ...p}) => p);
   const favoritePrayerIds = prayersFromWeb.filter(p => p.favorite).map(p => p.id);
   await replacePrayers(prayers, favoritePrayerIds);

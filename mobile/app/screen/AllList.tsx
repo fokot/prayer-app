@@ -2,20 +2,23 @@ import React from "react";
 import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
-  reorderAllPrayers, useAllPrayers, useTextColor, updateLastTab, updateLastTabListener
+  reorderAllPrayers, useAllPrayers, useTextColor, updateLastTabListener, NavigationProps
 } from "../utils/PrayerStore";
 import {PrayerListItem, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 import {Background} from "../components/Background";
 
-export const AllList = ({navigation}) => {
+export const AllList = ({navigation}: NavigationProps) => {
   const { navigate } = navigation;
   updateLastTabListener(navigation, 'All');
   const textColor = useTextColor();
   const prayers = useAllPrayers();
+
   return (
     <Background>
-      {prayers.length > 0 && <DraggableFlatList
+      {prayers.length > 0 &&
+      // @ts-ignore
+      <DraggableFlatList
           data={prayers}
           renderItem={PrayerListItem(navigate)}
           onMoveEnd={({ data }) => reorderAllPrayers(data)}

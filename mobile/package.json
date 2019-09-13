@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@types/ramda": "^0.26.18",
+    "@types/react-native-draggable-flatlist": "^1.1.1",
     "@types/uuid": "^3.4.5",
     "expo": "^34.0.4",
     "expo-barcode-scanner": "~6.0.0",

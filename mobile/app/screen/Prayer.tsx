@@ -1,7 +1,7 @@
-import React, {Component, useEffect, useState} from "react";
+import React from "react";
 import {ScrollView, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, toggleFavorite, deletePrayer} from "../utils/PrayerStore";
+import {usePrayer, toggleFavorite, deletePrayer, NavigationProps} from "../utils/PrayerStore";
 import {AppText} from "../components/AppText";
 import {blue} from "../utils/Colors";
 import {Background} from "../components/Background";
@@ -12,7 +12,7 @@ const Icon = (props: any) =>
             {...props}
   />;
 
-export const Prayer = ({navigation}) => {
+export const Prayer = ({navigation}: NavigationProps) => {
     const id = navigation.getParam('prayerId');
     const prayer = usePrayer(id);
     // const [isFavorite, setFavorite] = useState(prayer.favorite);

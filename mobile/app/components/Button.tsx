@@ -1,17 +1,24 @@
 import React from "react";
-import {Text, TouchableHighlight, View,} from "react-native";
+import {Text, TextStyle, TouchableHighlight, View, ViewStyle,} from "react-native";
 import {blue, blueLight} from "../utils/Colors";
 import {LocalText} from "./LocalText";
 
-const textStyle =
+const textStyle: TextStyle =
 {
-  color: "white",
+  color: 'white',
   fontSize: 18,
-  fontWeight: "bold",
-  textAlign: "center",
+  fontWeight: 'bold',
+  textAlign: 'center',
 };
 
-export const Button = ({title, m, onPress, style = {},}) =>
+type ButtonProps = {
+  title?: string,
+  m?: string,
+  onPress: () => void,
+  style?: ViewStyle
+}
+
+export const Button = ({title, m, onPress, style = {},}: ButtonProps) =>
   <TouchableHighlight
     style={{...{
       backgroundColor: blue,

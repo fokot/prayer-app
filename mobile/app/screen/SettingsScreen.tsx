@@ -6,7 +6,6 @@ import {
   Slider,
   StyleSheet,
   Switch,
-  Text,
   TouchableOpacity,
   View
 } from "react-native";
@@ -15,7 +14,7 @@ import React, {useEffect, useState} from "react";
 import {
   addCdnPrayers,
   currentStore,
-  getCdnPrayers, Language,
+  getCdnPrayers, NavigationProps,
   replaceCdnPrayers,
   replaceFromWeb, setFontSize, setLanguage,
   toggleDarkMode, updateLastTabListener,
@@ -25,14 +24,21 @@ import {Ionicons} from '@expo/vector-icons';
 import {RenderSeparator} from "./ListItemsComponents";
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import * as Permissions from 'expo-permissions';
-import {blue, blueDark, grey, greyDark, greyLight, white} from "../utils/Colors";
+import {blue, grey, greyLight, white} from "../utils/Colors";
 import {LocalText} from "../components/LocalText";
 import {AppText} from "../components/AppText";
 import {Background} from "../components/Background";
 
 const margin = 8;
 
-export const SettingsScreen = ({navigation}) => {
+type PrayerList = {
+  name: string,
+  file: string,
+}
+
+type CloseType = () => void;
+
+export const SettingsScreen = ({navigation}: NavigationProps) => {
   updateLastTabListener(navigation, 'Settings');
   const { language, darkMode, fontSize, }  = useSettings();
   const [showPrayersPicker, setShowPrayersPicker] = useState(false);
@@ -54,7 +60,10 @@ export const SettingsScreen = ({navigation}) => {
           <LocalText m="Language" />
           <Picker
             selectedValue={language}
-            style={{color: textColor}}
+            style={
+              // @ts-ignore this really works in android
+              {color: textColor}
+            }
             itemStyle={{fontSize}}
             onValueChange={setLanguage}>
             <Picker.Item label="English" value="en"/>
@@ -85,7 +94,6 @@ export const SettingsScreen = ({navigation}) => {
           style={{marginVertical: 2 * margin}}
           onPress={() => setShowPrayersPicker(true)}
           m="LoadPrayers"
-          color="#841584"
         />
         <AppText
           style={{
@@ -101,7 +109,6 @@ export const SettingsScreen = ({navigation}) => {
         <Button
           onPress={() => setShowSync(true)}
           m="EditInBrowser"
-          color="#841584"
         />
         <LocalText m="EditEnd" />
         <Modal
@@ -123,9 +130,9 @@ export const SettingsScreen = ({navigation}) => {
   )
 };
 
-const Sync = ({closeSync}) => {
-  const [clientId, setClientId] = useState(null);
-  const [hasCameraPermission, setCameraPermission] = useState(null);
+const Sync = ({closeSync}: {closeSync: CloseType}) => {
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [hasCameraPermission, setCameraPermission] = useState<boolean | null>(null);
 
   useEffect(
     () => {
@@ -157,17 +164,16 @@ const Sync = ({closeSync}) => {
     }}>
       <BarCodeScanner
         barCodeTypes={[BarCodeScanner.Constants.BarCodeType.qr]}
-        onBarCodeScanned={({type, data}) => {
-          setClientId(data);
+        onBarCodeScanned={({data}) =>
           setClientId(data)
-        }}
+        }
         style={StyleSheet.absoluteFillObject}
       />
     </Background>
   );
 }
 
-const Syncing = ({clientId, closeSync}) => {
+const Syncing = ({clientId, closeSync}: {clientId: string, closeSync: CloseType}) => {
   useEffect(
     () => {
       // const ws = new WebSocket(`ws://192.168.43.6/${clientId}`);
@@ -214,7 +220,7 @@ const Syncing = ({clientId, closeSync}) => {
   );
 }
 
-const PrayerModal = ({closeModal}) => {
+const PrayerModal = ({closeModal}: {closeModal: CloseType}) => {
   const [prayers, setPrayers] = useState([]);
   useEffect(
     () => {
@@ -223,11 +229,11 @@ const PrayerModal = ({closeModal}) => {
       };
     }, []
   );
-  const [selectedPrayer, setSelectedPrayer] = useState(null);
+  const [selectedPrayerList, setSelectedPrayerList] = useState(null);
   return (
     <Background style={{padding: margin}}>
-      {selectedPrayer ?
-        <SelectedPrayer prayer={selectedPrayer} closeModal={closeModal}/> :
+      {selectedPrayerList ?
+        <SelectedPrayerList prayerList={selectedPrayerList!} closeModal={closeModal}/> :
         <View>
           <Ionicons name="md-close"
                     onPress={closeModal}
@@ -236,7 +242,7 @@ const PrayerModal = ({closeModal}) => {
             <AppText>Loading...</AppText> :
             <FlatList
               data={prayers}
-              renderItem={({item}) => <LoadPrayerItem prayer={item} selectPrayer={() => setSelectedPrayer(item)}/>}
+              renderItem={({item}) => <LoadPrayerItem prayerList={item} selectPrayer={() => setSelectedPrayerList(item)}/>}
               keyExtractor={(item, index) => index.toString()}
               ItemSeparatorComponent={RenderSeparator}
             />
@@ -247,7 +253,7 @@ const PrayerModal = ({closeModal}) => {
   );
 }
 
-const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
+const LoadPrayerItem = ({prayerList: {name}, selectPrayer}: {prayerList: PrayerList, selectPrayer: () => void}) => (
     <TouchableOpacity
         onPress={selectPrayer}
     >
@@ -261,7 +267,7 @@ const LoadPrayerItem = ({prayer: {name}, selectPrayer}) => (
     </TouchableOpacity>
 );
 
-const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
+const SelectedPrayerList = ({prayerList: {name, file}, closeModal}: {prayerList: PrayerList, closeModal: CloseType}) => (
   <Background style={{width: '100%'}}>
     <Ionicons name="md-close"
               onPress={closeModal}
@@ -289,14 +295,14 @@ const SelectedPrayer = ({prayer: {name, file}, closeModal}) => (
       <Button
         style={{marginVertical: margin, width: '100%'}}
         onPress={() =>
-          addCdnPrayers(file).then(closeModal())
+          addCdnPrayers(file).then(closeModal)
         }
         m="AddPrayers"
       />
       <Button
         style={{marginVertical: margin}}
         onPress={() =>
-          replaceCdnPrayers(file).then(closeModal())
+          replaceCdnPrayers(file).then(closeModal)
         }
         m="ReplacePrayers"
       />

@@ -1,8 +1,14 @@
 import React, {useState} from "react";
 import {ScrollView, TextInput, View} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import {usePrayer, savePrayer, useTextColor, useMessages} from "../utils/PrayerStore";
-import {Prayer} from "../utils/Prayers";
+import {
+  usePrayer,
+  savePrayer,
+  useTextColor,
+  useMessages,
+  Prayer,
+  NavigationProps
+} from "../utils/PrayerStore";
 import uuid from 'uuid/v1';
 import {blue} from "../utils/Colors";
 import {Background} from "../components/Background";
@@ -17,7 +23,7 @@ const newPrayer = (): Prayer => ({
   id: uuid(), name: "", text: ""
 });
 
-export const PrayerEdit = ({navigation}) => {
+export const PrayerEdit = ({navigation}: NavigationProps) => {
     const translate = useMessages();
     const id = navigation.getParam('prayerId');
     const initialPrayer = id ? usePrayer(id) : newPrayer();

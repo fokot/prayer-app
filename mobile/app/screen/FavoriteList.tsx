@@ -2,13 +2,13 @@ import React, {useEffect, useState} from "react";
 import {View} from "react-native";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import {
-  useFavoritePrayers, reorderFavoritePrayers, useTextColor, updateLastTab, updateLastTabListener
+  useFavoritePrayers, reorderFavoritePrayers, useTextColor, updateLastTabListener, NavigationProps,
 } from "../utils/PrayerStore";
 import {PrayerListItem, PrayerListItemOpen, RenderSeparator} from "./ListItemsComponents";
 import { Ionicons } from '@expo/vector-icons';
 import {Background} from "../components/Background";
 
-export const FavoriteList = ({navigation}) => {
+export const FavoriteList = ({navigation}: NavigationProps) => {
   const {navigate} = navigation;
   updateLastTabListener(navigation, 'Favorite');
   const textColor = useTextColor();
@@ -16,7 +16,9 @@ export const FavoriteList = ({navigation}) => {
   const [isOpen, setOpen] = useState(false);
   return (
     <Background>
-      {prayers.length > 0 && <DraggableFlatList
+      {prayers.length > 0 &&
+      // @ts-ignore
+      <DraggableFlatList
           data={prayers}
           renderItem={isOpen ? PrayerListItemOpen : PrayerListItem(navigate)}
           onMoveEnd={({ data }) => reorderFavoritePrayers(data)}

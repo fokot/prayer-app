@@ -1,9 +1,10 @@
 import {Text, TouchableOpacity, View} from "react-native";
-import {toggleFavorite} from "../utils/PrayerStore";
+import {Navigation, Prayer, PrayerFull, toggleFavorite} from "../utils/PrayerStore";
 import React from "react";
 import { Ionicons } from '@expo/vector-icons';
 import {AppText} from "../components/AppText";
 import {blue} from "../utils/Colors";
+import {RenderItemInfo} from "react-native-draggable-flatlist";
 
 export const RenderSeparator = () => (
   <View
@@ -16,7 +17,8 @@ export const RenderSeparator = () => (
   />
 );
 
-export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isActive }) => {
+export const PrayerListItem = (navigate: Navigation['navigate']) =>
+  ({ item, move, moveEnd, isActive }: RenderItemInfo<PrayerFull>) => {
   return (
     <TouchableOpacity
       style={{
@@ -41,7 +43,7 @@ export const PrayerListItem = (navigate) => ({ item, index, move, moveEnd, isAct
   )
 };
 
-export const PrayerListItemOpen = ({item}) =>
+export const PrayerListItemOpen = ({item}: RenderItemInfo<PrayerFull>) =>
   <View
     style={{
       padding: 16
