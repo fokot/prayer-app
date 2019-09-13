@@ -65,19 +65,3 @@ To run `hlint`
 ```bash
 hlit .
 ```
-
-# Deployment
-
-To build docker image run
-```bash
-docker build -t fokot/prayer-app-server:latest .
-```
-Tag it
-```bash
-docker tag fokot/prayer-app-server gcr.io/prayerapp-248514/fokot/prayer-app-server:v1
-```
-Push it
-```bash
-gcloud docker -- push gcr.io/prayerapp-248514/fokot/prayer-app-server:v1
-```
-
