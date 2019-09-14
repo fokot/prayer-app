@@ -5,7 +5,7 @@ import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, fill, height, padding, paddingXY, px, rgb255, row, spacing, width)
+import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, fill, height, htmlAttribute, padding, paddingXY, px, rgb255, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -147,14 +147,7 @@ view : Model -> Html Msg
 view model =
     Element.layout
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
-      , Element.inFront (
-          column [ width fill ]
-            [ topbar model
-            , Element.el [ paddingXY 330 10 ] <| case model.openPrayer of
-                Nothing -> Element.none
-                Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
-            ]
-        )
+      , Element.inFront ( topbar model )
       , Background.color <| grey 248
       , padding 10
       , width fill
@@ -172,9 +165,15 @@ noPadding = padding 0
 when : Bool -> Element Msg -> Element Msg
 when p e = if p then e else Element.none
 
+prayerEdit model =
+-- Left and top needs to be set so it does not overlay over the list and list get mouse events
+  Element.el [ htmlAttribute <| Html.Attributes.style "style" "left: 330px; top: 10px" ] <| case model.openPrayer of
+    Nothing -> Element.none
+    Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
+
 topbar : Model -> Element Msg
 topbar model =
-  row [ paddingXY 10 0, height <| px 140, Background.color blue, width fill, spacing 10 ]
+  row [ paddingXY 10 0, height <| px 140, Background.color blue, width fill, spacing 10, Element.below <| prayerEdit model ]
     [ button [ noPadding, Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
     , when model.appConnected <| button [ noPadding ]
       { onPress = Just Load
