@@ -5,7 +5,7 @@ import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import Element exposing (Attribute, Element, alignTop, centerX, centerY, column, fill, height, maximum, padding, px, rgb255, row, spacing, width)
+import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, fill, height, padding, paddingXY, px, rgb255, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -21,7 +21,7 @@ import QRCode
 import Tuple exposing (mapSecond)
 import Element.Input
 import Random
-import Utils exposing (grey, u)
+import Utils exposing (blue, grey, white)
 import Uuid exposing (uuidGenerator, Uuid)
 import Element.Background as Background
 import Element.Border as Border
@@ -147,33 +147,45 @@ view : Model -> Html Msg
 view model =
     Element.layout
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
+      , Element.inFront (
+          column [ width fill ]
+            [ topbar model
+            , Element.el [ paddingXY 330 10 ] <| case model.openPrayer of
+                Nothing -> Element.none
+                Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
+            ]
+        )
       , Background.color <| grey 248
       , padding 10
       , width fill
       ]
       (
-      column [ height fill ]
-      [ column [] <| List.map Element.text model.errors
-      , row [ spacing 5 ]
-        [ button [Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
-        , button [ Background.color <| rgb255 255 255 255]
-          { onPress = Just Load
-          , label = Element.html <| Html.img [ Html.Attributes.src "/img/load.png", Html.Attributes.width 160, Html.Attributes.height 120] []
-          }
-        , button []
-          { onPress = Just Save
-          , label = Element.html <| Html.img [ Html.Attributes.src "/img/save.png", Html.Attributes.width 160, Html.Attributes.height 120] []
-          }
-        , clientIdView model.clientId model.appConnected
-        ]
-      , row [ width fill, alignTop, spacing 30 ]
-        [ Element.map PrayerListMsg (PrayerList.view model)
-        , case model.openPrayer of
-            Nothing -> Element.text "No prayer selected"
-            Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
-        ]
-      ]
+      column [ height fill, paddingXY 0 150 ]
+      [ Element.map PrayerListMsg (PrayerList.view model) ]
+--      column [] <| List.map Element.text model.errors
+--      , topbar model
+--      , row [ width fill, alignTop, spacing 30 ]
       )
+
+noPadding = padding 0
+
+when : Bool -> Element Msg -> Element Msg
+when p e = if p then e else Element.none
+
+topbar : Model -> Element Msg
+topbar model =
+  row [ paddingXY 10 0, height <| px 140, Background.color blue, width fill, spacing 10 ]
+    [ button [ noPadding, Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
+    , when model.appConnected <| button [ noPadding ]
+      { onPress = Just Load
+      , label = Element.html <| Html.img [ Html.Attributes.src "/img/load.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+      }
+    , when model.appConnected <| button [ noPadding ]
+      { onPress = Just Save
+      , label = Element.html <| Html.img [ Html.Attributes.src "/img/save.png", Html.Attributes.width 160, Html.Attributes.height 120] []
+      }
+    , Element.el [ alignRight ] <| clientIdView model.clientId model.appConnected
+    ]
 
 clientIdView : Maybe String -> Bool -> Element msg
 clientIdView code appConnected =
@@ -181,7 +193,7 @@ clientIdView code appConnected =
   then Element.el [Font.size 32] (Element.text "Phone\nconnected")
   else case code of
     Just c ->
-      Element.el [ Background.color <| if appConnected then rgb255 0 220 0 else rgb255 255 255 255 ]
+      Element.el [ Background.color white ]
         (qrCodeView c)
     Nothing -> Element.none
 

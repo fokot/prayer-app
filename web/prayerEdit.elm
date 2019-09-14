@@ -1,15 +1,10 @@
 module PrayerEdit exposing (update, view, Msg)
 
 import Model exposing (Prayer)
-import Element exposing (Attribute, Element, alignLeft, alignTop, centerX, centerY, column, el, fill, maximum, padding, rgb255, row, spacing, text, width)
-import Element.Background as Background
-import Element.Border as Border
+import Element exposing (Attribute, Element, alignTop, column, fill, maximum, spacing, text, width)
 import Element.Font as Font
-import Element.Events exposing (onClick)
 import Element.Input as Input
-import Html.Attributes
-import Model exposing (Model, updatePrayer, emptyPrayer)
-import Utils exposing (maybeGet)
+import Model exposing (Model, updatePrayer)
 
 -- UPDATE
 
@@ -17,14 +12,14 @@ type Msg = ChangeName String | ChangeText String
 
 update : Msg -> Model -> Model
 update message model =
-  let
-    prayer = maybeGet model.openPrayer
-    newPrayer =
-      case message of
-        ChangeName name -> { prayer | name = name }
-        ChangeText text -> { prayer | text = text }
-  in
-    updatePrayer newPrayer model
+  case model.openPrayer of
+    Just prayer ->
+      let
+        newPrayer = case message of
+          ChangeName name -> { prayer | name = name }
+          ChangeText text -> { prayer | text = text }
+      in updatePrayer newPrayer model
+    Nothing -> model
 
 -- VIEW
 

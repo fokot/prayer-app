@@ -68,7 +68,7 @@ update message model =
 
 view : Model -> Element Msg
 view model =
-  column [ alignLeft, width <| px 300, spacing 5, scrollbarY, padding 5, height fill ]
+  column [ alignLeft, width <| px 300, spacing 5 ]
   (model.prayers |> List.indexedMap (prayerView model))
 
 nameView : Prayer -> String

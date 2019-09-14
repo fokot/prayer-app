@@ -1,11 +1,9 @@
 module Model exposing (..)
 
-import Element exposing (Color, rgb255)
-import Json.Decode as JD exposing (Decoder, field)
-import Json.Encode as Encode
+import Json.Decode as D exposing (Decoder, field)
+import Json.Encode as E
 import List
 import DnDList
-import Utils exposing (u)
 import Uuid exposing (Uuid)
 import List.Extra as List
 
@@ -18,20 +16,27 @@ type alias Prayer =
   , favorite : Bool
   }
 
+uuidDecoder : Decoder Uuid
+uuidDecoder = D.string |> D.andThen (\u ->
+  case Uuid.fromString u of
+    Just uuid -> D.succeed uuid
+    Nothing -> D.fail <| u ++ " is not UUID"
+  )
+
 prayerDecoder : Decoder Prayer
 prayerDecoder =
-  JD.map4 Prayer
-    (JD.map u <| field "id" JD.string)
-    (field "name" JD.string)
-    (field "text" JD.string)
-    (field "favorite" JD.bool)
+  D.map4 Prayer
+    (field "id" uuidDecoder)
+    (field "name" D.string)
+    (field "text" D.string)
+    (field "favorite" D.bool)
 
-prayerEncode : Prayer -> Encode.Value
-prayerEncode p = Encode.object
-  [ ( "id", Encode.string <| Uuid.toString p.id )
-  , ( "name", Encode.string p.name )
-  , ( "text", Encode.string p.text )
-  , ( "favorite", Encode.bool p.favorite )
+prayerEncode : Prayer -> E.Value
+prayerEncode p = E.object
+  [ ( "id", E.string <| Uuid.toString p.id )
+  , ( "name", E.string p.name )
+  , ( "text", E.string p.text )
+  , ( "favorite", E.bool p.favorite )
   ]
 
 type alias Model =
