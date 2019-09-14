@@ -21,3 +21,8 @@ Check typescript errors like
 ```bash
 yarn run tsc
 ```
+
+Sometimes clearing expo cache is needed
+```bash
+expo start -c
+```

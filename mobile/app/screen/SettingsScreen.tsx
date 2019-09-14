@@ -152,10 +152,18 @@ const Sync = ({closeSync}: {closeSync: CloseType}) => {
   );
 
   if (hasCameraPermission === null) {
-    return <AppText>Requesting for camera permission</AppText>;
+    return (
+      <Background>
+        <AppText>Requesting for camera permission</AppText>
+      </Background>
+    );
   }
   if (hasCameraPermission === false) {
-    return <AppText>No access to camera</AppText>;
+    return (
+      <Background>
+        <AppText>No access to camera</AppText>
+      </Background>
+    );
   }
 
   if (clientId) {
