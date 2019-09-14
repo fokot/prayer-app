@@ -15,11 +15,7 @@ and then open Now go to [http://localhost:8000/](http://localhost:8000/)
 `elm reactor` is not working with it as I needed custom ports to do websockets.
 They are not supported in Elm 0.19 yet...
 
-For production build it with flag `--optimize` 
-```bash
-elm make Main.elm --output=main.js --optimize
-```
-
+For production build use `build-web.sh`.
 
 To debug Elm-ui you can use `Attribute`
 ```elm
