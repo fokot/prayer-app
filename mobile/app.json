@@ -29,8 +29,8 @@
     },
     "android": {
       "package": "com.fokot.prayerApp",
-      "permissions": [],
-      "versionCode": 2
+      "permissions": ["CAMERA"],
+      "versionCode": 3
     },
     "androidStatusBar": {
       "backgroundColor": "#092840"
