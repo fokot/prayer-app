@@ -10,8 +10,11 @@
 <body>
 <div id="elm"></div>
 <script>
+  let windowSize = { width: innerWidth, height: innerHeight };
+
   const app = Elm.Main.init({
-    node: document.getElementById('elm')
+    node: document.getElementById('elm'),
+    flags: windowSize,
   });
 
   let ws = null;
@@ -33,6 +36,16 @@
   app.ports.wsSend.subscribe(data => ws.send(JSON.stringify(data)));
 
   app.ports.errorLog.subscribe(data => console.error(data));
+
+  const checkWindowSize = () => {
+    if( windowSize.width !== innerWidth || windowSize.height !== innerHeight ) {
+      windowSize = { width: innerWidth, height: innerHeight };
+      app.ports.resize.send(windowSize);
+      console.log('resize');
+    }
+  };
+  // there is no resize event :(
+  setInterval(checkWindowSize, 1000);
 </script>
 </body>
 </html>

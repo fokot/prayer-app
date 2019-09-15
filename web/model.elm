@@ -39,8 +39,20 @@ prayerEncode p = E.object
   , ( "favorite", E.bool p.favorite )
   ]
 
+type alias WindowSize =
+  { width: Int
+  , height: Int
+  }
+
+windowSizeDecoder : Decoder WindowSize
+windowSizeDecoder =
+  D.map2 WindowSize
+    (field "width" D.int)
+    (field "height" D.int)
+
 type alias Model =
-  { dnd          : DnDList.Model
+  { windowSize   : WindowSize
+  , dnd          : DnDList.Model
   , prayers      : List Prayer
   , openPrayer   : Maybe Prayer
   , clientId     : Maybe String

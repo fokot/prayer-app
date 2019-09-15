@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
 import Browser
+import Browser.Dom as Dom
 import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
@@ -10,7 +11,7 @@ import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import List.Extra as List
-import Model exposing (Prayer, prayerEncode)
+import Model exposing (Prayer, WindowSize, prayerEncode, windowSizeDecoder)
 import PrayerEdit
 import PrayerList
 import Platform.Sub as Sub
@@ -18,6 +19,7 @@ import Platform.Cmd as Cmd
 import Model exposing (Model, addPrayer)
 import Model exposing (Model, addPrayer)
 import QRCode
+import Task
 import Tuple exposing (mapSecond)
 import Element.Input
 import Random
@@ -31,9 +33,10 @@ import Element.Border as Border
 
 port wsSend    : Encode.Value -> Cmd msg
 port wsReceive : (Encode.Value -> msg) -> Sub msg
+port resize : (Encode.Value -> msg) -> Sub msg
 port errorLog  : String -> Cmd msg
 
-main : Program () Model Msg
+main : Program WindowSize Model Msg
 main =
     Browser.element
         { init = init
@@ -42,6 +45,7 @@ main =
         , subscriptions = \m -> Sub.batch
           [ (PrayerList.subscriptions >> Sub.map PrayerListMsg) m
           , wsReceive convertWsToMsg
+          , resize resizeToMsg
           ]
         }
 
@@ -53,9 +57,19 @@ convertWsToMsg v =
       Err e -> Error <| "unknown ws message: " ++ Decode.errorToString e
       Ok m -> WsIncoming m
 
-initialModel : Model
-initialModel =
+resizeToMsg : Encode.Value -> Msg
+resizeToMsg v =
+  let res = Decode.decodeValue windowSizeDecoder v
+  in
+    case res of
+      Err e -> Error <| "unknown window size: " ++ Decode.errorToString e
+      Ok m -> Resize m
+
+
+initialModel : WindowSize -> Model
+initialModel size =
   {
+  windowSize = size,
   dnd = PrayerList.system.model,
   prayers = [],
   openPrayer = Nothing,
@@ -64,8 +78,8 @@ initialModel =
   errors = []
   }
 
-init : () -> ( Model, Cmd Msg )
-init _ = ( initialModel, Cmd.none )
+init : (WindowSize) -> ( Model, Cmd Msg )
+init size = ( initialModel size , Cmd.none )
 
 -- UPDATE
 
@@ -78,6 +92,8 @@ type Msg
   | Save
   | WsIncoming IncomingMsg
   | Error String
+  | Resize WindowSize
+  | NoOp
 
 type IncomingMsg = WsClientId String | WsPrayers (List Prayer) | WsClosed | WsTunnelOpen
 
@@ -100,6 +116,10 @@ wsClosedDecoder =
       _        -> Decode.fail <| "unknown message: " ++ s
   )
 
+focusEditName : Cmd Msg
+focusEditName =
+  Task.attempt (\_ -> NoOp) (Dom.focus "edit-name")
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
   case message of
@@ -108,9 +128,9 @@ update message model =
     PrayerEditMsg m -> (PrayerEdit.update m model, Cmd.none)
     New ->
       case List.find (\p -> String.isEmpty p.name) model.prayers of
-        Just p -> ({model | openPrayer = Just p}, Cmd.none)
+        Just p -> ({model | openPrayer = Just p}, focusEditName)
         Nothing -> (model, Random.generate NewRandomId uuidGenerator)
-    NewRandomId id -> (addPrayer id model, Cmd.none)
+    NewRandomId id -> (addPrayer id model, focusEditName)
     Load -> (model, wsSend <| Encode.string "load")
     Save ->
       if List.any (\p -> p.name == "") model.prayers
@@ -129,6 +149,8 @@ update message model =
       }
       , Cmd.none)
     Error e -> (model, errorLog e)
+    Resize s -> ({model | windowSize = s }, Cmd.none)
+    NoOp -> (model, Cmd.none)
 
 -- VIEW
 
@@ -147,14 +169,26 @@ view : Model -> Html Msg
 view model =
     Element.layout
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
-      , Element.inFront ( topbar model )
       , Background.color <| grey 248
-      , padding 10
       , width fill
       ]
       (
-      column [ height fill, paddingXY 0 150 ]
-      [ Element.map PrayerListMsg (PrayerList.view model) ]
+        column
+          [ height fill
+          , width fill
+          ]
+          [ topbar model
+          , row
+            [ padding 10
+            , spacing 10
+            , height fill
+            ]
+            [ Element.map PrayerListMsg (PrayerList.view (model.windowSize.height - topbarHeight) model)
+            , case model.openPrayer of
+                Nothing -> Element.none
+                Just p -> Element.map PrayerEditMsg (PrayerEdit.view (model.windowSize.width - 340) p)
+            ]
+          ]
 --      column [] <| List.map Element.text model.errors
 --      , topbar model
 --      , row [ width fill, alignTop, spacing 30 ]
@@ -165,15 +199,11 @@ noPadding = padding 0
 when : Bool -> Element Msg -> Element Msg
 when p e = if p then e else Element.none
 
-prayerEdit model =
--- Left and top needs to be set so it does not overlay over the list and list get mouse events
-  Element.el [ htmlAttribute <| Html.Attributes.style "style" "left: 330px; top: 10px" ] <| case model.openPrayer of
-    Nothing -> Element.none
-    Just p -> Element.map PrayerEditMsg (PrayerEdit.view p)
+topbarHeight = 140
 
 topbar : Model -> Element Msg
 topbar model =
-  row [ paddingXY 10 0, height <| px 140, Background.color blue, width fill, spacing 10, Element.below <| prayerEdit model ]
+  row [ paddingXY 10 0, height <| px topbarHeight, Background.color blue, width fill, spacing 10 ]
     [ button [ noPadding, Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
     , when model.appConnected <| button [ noPadding ]
       { onPress = Just Load
