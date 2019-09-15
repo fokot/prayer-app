@@ -138,13 +138,13 @@ export const SettingsScreen = ({navigation}: NavigationProps) => {
 
 const Sync = ({closeSync}: {closeSync: CloseType}) => {
   const [clientId, setClientId] = useState<string | null>(null);
-  const [hasCameraPermission, setCameraPermission] = useState<boolean | null>(null);
+  const [hasCameraPermission, setCameraPermission] = useState<string | null>(null);
 
   useEffect(
     () => {
       Permissions.askAsync(Permissions.CAMERA).then(
         ({status}) =>
-          setCameraPermission(status === 'granted')
+          setCameraPermission(status)
       )
       return () => {
       };
@@ -158,10 +158,10 @@ const Sync = ({closeSync}: {closeSync: CloseType}) => {
       </Background>
     );
   }
-  if (hasCameraPermission === false) {
+  if (hasCameraPermission !== 'granted') {
     return (
       <Background>
-        <AppText>No access to camera</AppText>
+        <AppText>No access to camera (status: {hasCameraPermission})</AppText>
       </Background>
     );
   }
