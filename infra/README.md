@@ -32,6 +32,8 @@ and symlinked to `sites-enabled`
 sudo systemctl restart nginx
 ```
 
+[Privacy policy](https://prayer-app.tk/privacy-policy.html) needs to be online because of play store.
+
 Https is enables via [letsencrypt](https://letsencrypt.org/).
 and renewed like
 ```bash
