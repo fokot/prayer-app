@@ -122,8 +122,7 @@ readAllData().then(
 type PartialAll<T> = T extends object ? { [K in keyof T]?: PartialAll<T[K]> } : T;
 
 const updateStoreMerge = (value: PartialAll<StoreType>): StoreType => updateStore(s =>
-  // @ts-ignore
-  mergeDeepRight(s, value)
+  mergeDeepRight(s, value) as StoreType
 );
 
 const updateSettings = async (f: (arg: SettingsType) => SettingsType) => {
