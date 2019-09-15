@@ -8,6 +8,7 @@ npm-debug.*
 *.orig.*
 mobile/web-build/
 mobile/web-report/
+mobile/app/version.json
 .idea
 *.log
 /prayers
