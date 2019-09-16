@@ -2,10 +2,11 @@ module PrayerEdit exposing (update, view, Msg)
 
 import Html.Attributes
 import Model exposing (Prayer)
-import Element exposing (Attribute, Element, alignTop, column, fill, maximum, px, spacing, text, width)
+import Element exposing (Attribute, Element, alignTop, column, px, spacing, text, width)
 import Element.Font as Font
 import Element.Input as Input
 import Model exposing (Model, updatePrayer)
+import Utils exposing (space)
 
 -- UPDATE
 
@@ -26,7 +27,7 @@ update message model =
 
 view : Int -> Prayer -> Element Msg
 view editVidth prayer =
-  column [ alignTop, spacing 10, width <| px editVidth ]
+  column [ alignTop, spacing space, width <| px editVidth ]
     [ Input.text
         [ Font.size 24, Font.bold, Element.htmlAttribute <| Html.Attributes.id "edit-name"  ]
           { onChange = ChangeName

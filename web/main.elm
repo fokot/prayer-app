@@ -6,7 +6,7 @@ import Element.Border exposing (rounded)
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, fill, height, htmlAttribute, padding, paddingXY, px, rgb255, row, spacing, width)
+import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, fill, height, padding, paddingXY, px, row, spacing, width)
 import DnDList
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -23,7 +23,7 @@ import Task
 import Tuple exposing (mapSecond)
 import Element.Input
 import Random
-import Utils exposing (blue, grey, white)
+import Utils exposing (blue, grey, greyLight, space, white)
 import Uuid exposing (uuidGenerator, Uuid)
 import Element.Background as Background
 import Element.Border as Border
@@ -157,19 +157,25 @@ update message model =
 button attrs a = Element.Input.button
   ( (width <| px 160)
   :: (height <| px 120)
-  :: rounded 10
-  :: padding 10
+  :: rounded space
+  :: padding space
   :: Border.solid
-  :: (Border.color <| rgb255 220 220 220)
+  :: Border.color grey
   :: Border.width 2
   :: attrs
   ) a
+
+topbarHeight : Int
+topbarHeight = 140
+
+listWidth : Int
+listWidth = 300
 
 view : Model -> Html Msg
 view model =
     Element.layout
       [ Element.inFront (Element.map PrayerListMsg (PrayerList.ghostView model))
-      , Background.color <| grey 248
+      , Background.color greyLight
       , width fill
       ]
       (
@@ -179,14 +185,14 @@ view model =
           ]
           [ topbar model
           , row
-            [ padding 10
-            , spacing 10
+            [ padding space
+            , spacing space
             , height fill
             ]
-            [ Element.map PrayerListMsg (PrayerList.view (model.windowSize.height - topbarHeight) model)
+            [ Element.map PrayerListMsg (PrayerList.view listWidth (model.windowSize.height - topbarHeight - (2 * space)) model)
             , case model.openPrayer of
                 Nothing -> Element.none
-                Just p -> Element.map PrayerEditMsg (PrayerEdit.view (model.windowSize.width - 340) p)
+                Just p -> Element.map PrayerEditMsg (PrayerEdit.view (model.windowSize.width - listWidth - (5 * space)) p)
             ]
           ]
 --      column [] <| List.map Element.text model.errors
@@ -199,11 +205,9 @@ noPadding = padding 0
 when : Bool -> Element Msg -> Element Msg
 when p e = if p then e else Element.none
 
-topbarHeight = 140
-
 topbar : Model -> Element Msg
 topbar model =
-  row [ paddingXY 10 0, height <| px topbarHeight, Background.color blue, width fill, spacing 10 ]
+  row [ paddingXY space 0, height <| px topbarHeight, Background.color blue, width fill, spacing space ]
     [ button [ noPadding, Font.size 100] { onPress = Just New, label = Element.el [centerX, centerY] <| Element.text "+"}
     , when model.appConnected <| button [ noPadding ]
       { onPress = Just Load

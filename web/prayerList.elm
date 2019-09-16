@@ -4,7 +4,7 @@ import Html
 import Html.Events
 import Json.Decode as Decode
 import List
-import Element exposing (Attribute, Element, alignLeft, alignRight, centerX, centerY, column, el, fill, height, padding, px, rgb255, row, scrollbarY, spacing, text, width)
+import Element exposing (Attribute, Element, alignLeft, alignRight, centerY, column, fill, height, padding, px, row, scrollbarY, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -12,7 +12,7 @@ import Element.Events exposing (onClick)
 import Html.Attributes
 import DnDList
 import Model exposing (Model, Prayer, deletePrayer, getId, isSelected, updatePrayer)
-import Utils exposing (grey)
+import Utils exposing (black, green, grey, greyDark, greyLight, space, white)
 
 
 -- SYSTEM
@@ -66,9 +66,9 @@ update message model =
 
 -- VIEW
 
-view : Int -> Model -> Element Msg
-view listHeight model =
-  column [ alignLeft, width <| px 300, spacing 5, height <| px listHeight, scrollbarY ]
+view : Int -> Int -> Model -> Element Msg
+view listWidth listHeight model =
+  column [ alignLeft, width <| px listWidth, spacing 5, height <| px listHeight, scrollbarY ]
   (model.prayers |> List.indexedMap (prayerView model))
 
 nameView : Prayer -> String
@@ -81,7 +81,7 @@ prayerItemSizeAtts : List (Attribute msg)
 prayerItemSizeAtts =
   [ width fill
   , height <| px 60
-  , padding 10
+  , padding space
   ]
 
 -- stop propagating events, otherwise it will send event also for background element
@@ -103,12 +103,12 @@ icon attrs msg class =
 prayerItem : Bool -> Prayer -> Element Msg
 prayerItem selected p =
   row
-  ([ Background.color (if selected then (rgb255 0 200 0) else (grey 248))
-      , Font.color (if selected then (grey 255) else (grey 0))
+  ([ Background.color (if selected then green else greyLight)
+      , Font.color (if selected then white else black)
       , Border.rounded 3
       , Border.solid
       , Border.width 1
-      , Border.color <| grey 100
+      , Border.color greyDark
 --      , Border.shadow { offset = ( 3, 3 )
 --                          , size = 2
 --                          , blur = 4
@@ -136,11 +136,11 @@ prayerView model index prayer =
           (prayerItem selected prayer)
         else
           Element.el
-            ( Background.color (grey 255)
+            ( Background.color white
             :: Border.rounded 3
             :: Border.dotted
             :: Border.width 1
-            :: (Border.color <| grey 0)
+            :: Border.color black
             :: Element.htmlAttribute (Html.Attributes.id (getId prayer))
             :: prayerItemSizeAtts
             )
