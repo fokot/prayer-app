@@ -165,11 +165,9 @@ button attrs a = Element.Input.button
   :: attrs
   ) a
 
-topbarHeight : Int
 topbarHeight = 140
-
-listWidth : Int
 listWidth = 300
+footerHeight = 24
 
 view : Model -> Html Msg
 view model =
@@ -189,16 +187,27 @@ view model =
             , spacing space
             , height fill
             ]
-            [ Element.map PrayerListMsg (PrayerList.view listWidth (model.windowSize.height - topbarHeight - (2 * space)) model)
+            [ Element.map PrayerListMsg (PrayerList.view listWidth (model.windowSize.height - topbarHeight - footerHeight - (2 * space)) model)
             , case model.openPrayer of
                 Nothing -> Element.none
                 Just p -> Element.map PrayerEditMsg (PrayerEdit.view (model.windowSize.width - listWidth - (5 * space)) p)
             ]
+          , footer
           ]
 --      column [] <| List.map Element.text model.errors
 --      , topbar model
 --      , row [ width fill, alignTop, spacing 30 ]
       )
+
+footer = Element.el
+  [ Background.color blue
+  , width fill
+  , height <| px footerHeight
+  , Font.size 16
+  , Font.center
+  , paddingXY 0 ((footerHeight - 16) // 2)
+  ]
+  (Element.text "--- PrayerApp ---")
 
 noPadding = padding 0
 
@@ -233,5 +242,5 @@ clientIdView code appConnected =
 qrCodeView : String -> Element msg
 qrCodeView message =
   QRCode.encode message
-    |> Result.map (QRCode.toSvg >>  Element.html)
+    |> Result.map (QRCode.toSvg >> Element.html)
     |> Result.withDefault (Element.text "Error while encoding to QRCode.")
