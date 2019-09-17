@@ -21,3 +21,8 @@ To debug Elm-ui you can use `Attribute`
 ```elm
 Element.explain Debug.todo
 ```
+
+Format elm code like
+```bash
+elm-format .
+```
