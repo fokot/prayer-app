@@ -4,7 +4,7 @@
 
 **PrayerApp** is react native app for daily prayers
 
-<img src="screenshot.png" width="816" height="505" />
+<img src="screenshot.jpg" width="816" height="505" />
 
 ## Features
 - add prayer
