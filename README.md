@@ -15,6 +15,7 @@
 - edit prayers on web and sync with phone
 
 ## Project Organisation
+- infra  - infrastructure (deployment)
 - mobile - react-native mobile app
 - server - haskell server
 - web    - elm web app
