@@ -105,7 +105,7 @@ connectApp connApp stateRef tunnel =
   Concurrent.modifyMVar_ stateRef (\state ->
     let (clientId, connWeb, _) = tunnel
         newTunnel =  (clientId, connWeb, Just connApp)
-        newState  = foldl (\acc a -> (if first a == clientId then newTunnel else a) : acc ) [] state
+        newState  = foldl' (\acc a -> (if first a == clientId then newTunnel else a) : acc ) [] state
     in
     WS.sendTextData connWeb (BSU.fromString "\"tunnel-open\"") $> newState
   )
