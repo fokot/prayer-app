@@ -4,11 +4,11 @@
 
 **PrayerApp** is react native app for daily prayers
 
-<img src="screenshot.jpg" width="816" height="505" />
-
 <img src="play_store.svg" width="135" height="40"/>
 
 Companion app can be found at [prayer-app.tk](https://prayer-app.tk) 
+
+<img src="screenshot.jpg" width="816" height="505" />
 
 ## Features
 - add prayer
