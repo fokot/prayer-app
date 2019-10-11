@@ -4,7 +4,9 @@
 
 **PrayerApp** is react native app for daily prayers
 
-<img src="play_store.svg" width="135" height="40"/>
+<a href="https://play.google.com/store/apps/details?id=com.fokot.prayerApp">
+  <img src="google-play-badge.png"/>
+</a>
 
 Companion app can be found at [prayer-app.tk](https://prayer-app.tk) 
 
