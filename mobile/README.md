@@ -31,3 +31,9 @@ Sometimes clearing expo cache is needed
 ```bash
 expo start -c
 ```
+
+To deploy to app store run
+```bash
+expo build:ios
+expo upload:ios --apple-id XXX --apple-id-password XXX
+```
