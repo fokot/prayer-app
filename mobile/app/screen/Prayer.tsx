@@ -5,6 +5,7 @@ import {usePrayer, toggleFavorite, deletePrayer, NavigationProps} from "../utils
 import {AppText} from "../components/AppText";
 import {blue} from "../utils/Colors";
 import {Background} from "../components/Background";
+import {tabBarHeight} from "../utils/Utils";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -27,16 +28,17 @@ export const Prayer = ({navigation}: NavigationProps) => {
       }
     );
     return (
-      <Background>
+      <View>
         <View
           style={{
             paddingHorizontal: 16,
             backgroundColor: blue,
-            height: 50,
+            height: tabBarHeight,
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-end",
+            paddingBottom: 10,
           }}
         >
           <Icon
@@ -69,24 +71,26 @@ export const Prayer = ({navigation}: NavigationProps) => {
             />
           </View>
         </View>
-        <ScrollView
-          style={{
-            padding: 16
-          }}
-        >
-          <AppText style={{
-            fontWeight: 'bold',
-          }}
-          >{prayer.name}</AppText>
-
-          <AppText
+        <Background>
+          <ScrollView
             style={{
-              paddingTop: 16
+              padding: 16
             }}
-          >{prayer.text}</AppText>
-        </ScrollView>
+          >
+            <AppText style={{
+              fontWeight: 'bold',
+            }}
+            >{prayer.name}</AppText>
 
-      </Background>
+            <AppText
+              style={{
+                paddingTop: 16
+              }}
+            >{prayer.text}</AppText>
+          </ScrollView>
+
+        </Background>
+      </View>
     )
 };
 

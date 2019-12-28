@@ -1,12 +1,12 @@
 import React from 'react';
-import {StyleSheet, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {createMaterialTopTabNavigator, TabBarIconProps} from "react-navigation";
 import {SettingsScreen} from "./SettingsScreen";
 import {AllList} from "./AllList";
 import {FavoriteList} from "./FavoriteList";
-import {black, blue, blueLight, white} from "../utils/Colors";
+import {black, blue, white} from "../utils/Colors";
 import {currentStore} from "../utils/PrayerStore";
+import {tabBarHeight} from "../utils/Utils";
 
 const TabBarIcon = (name: string) => ({focused, }: TabBarIconProps) =>
   (<Ionicons size={32} name={name} color={focused ? white : black} />);
@@ -42,7 +42,8 @@ export const Home = createMaterialTopTabNavigator(
       style: {
         backgroundColor: blue,
         elevation: 0,
-        height: 50,
+        height: tabBarHeight,
+        alignItems: 'center'
       },
       indicatorStyle: {
         backgroundColor: white,

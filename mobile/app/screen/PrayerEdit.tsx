@@ -12,6 +12,7 @@ import {
 import uuid from 'uuid/v1';
 import {blue} from "../utils/Colors";
 import {Background} from "../components/Background";
+import {tabBarHeight} from "../utils/Utils";
 
 const Icon = (props: any) =>
   <Ionicons size={32}
@@ -30,16 +31,17 @@ export const PrayerEdit = ({navigation}: NavigationProps) => {
     const [prayer, setPrayer] = useState(initialPrayer);
     const textColor = useTextColor();
     return (
-      <Background>
+      <View>
         <View
           style={{
             paddingHorizontal: 16,
             backgroundColor: blue,
-            height: 50,
+            height: tabBarHeight,
             display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-end",
+            paddingBottom: 10,
           }}
         >
           <Icon
@@ -72,36 +74,40 @@ export const PrayerEdit = ({navigation}: NavigationProps) => {
             />
           </View>
         </View>
-        <ScrollView
-          style={{
-            padding: 16
-          }}
-        >
-          <TextInput
+        <Background>
+          <ScrollView
             style={{
-              fontWeight: 'bold',
-              color: textColor,
-              fontSize: 32,
+              padding: 16
             }}
-            value={prayer.name}
-            placeholder={translate['Name']}
-            onChangeText={(text) => setPrayer({...prayer, name: text})}
-          />
-          <TextInput
-            style={{
-              fontWeight: 'bold',
-              color: textColor,
-              fontSize: 32,
-            }}
-            value={prayer.text}
-            placeholder={translate['Text']}
-            multiline={true}
-            numberOfLines={10}
-            onChangeText={(text) => setPrayer({...prayer, text: text})}
-          />
-        </ScrollView>
+          >
+            <TextInput
+              style={{
+                fontWeight: 'bold',
+                color: textColor,
+                fontSize: 32,
+              }}
+              value={prayer.name}
+              placeholder={translate['Name']}
+              placeholderTextColor="lightgrey"
+              onChangeText={(text) => setPrayer({...prayer, name: text})}
+            />
+            <TextInput
+              style={{
+                fontWeight: 'bold',
+                color: textColor,
+                fontSize: 32,
+              }}
+              value={prayer.text}
+              placeholder={translate['Text']}
+              placeholderTextColor="lightgrey"
+              multiline={true}
+              numberOfLines={10}
+              onChangeText={(text) => setPrayer({...prayer, text: text})}
+            />
+          </ScrollView>
 
-      </Background>
+        </Background>
+      </View>
     )
 };
 

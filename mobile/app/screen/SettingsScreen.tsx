@@ -5,7 +5,7 @@ import {
   ScrollView,
   Slider,
   StyleSheet,
-  Switch,
+  Switch, Text,
   TouchableOpacity,
   View
 } from "react-native";
@@ -61,14 +61,11 @@ export const SettingsScreen = ({navigation}: NavigationProps) => {
           <LocalText m="Language" />
           <Picker
             selectedValue={language}
-            style={
-              // @ts-ignore this really works in android
-              {color: textColor}
-            }
+            // @ts-ignore this really works on ios
             itemStyle={{fontSize}}
             onValueChange={setLanguage}>
-            <Picker.Item label="English" value="en"/>
-            <Picker.Item label="Slovak" value="sk"/>
+            <Picker.Item label="English" value="en" color={textColor}/>
+            <Picker.Item label="Slovak" value="sk" color={textColor}/>
           </Picker>
         </View>
         <View style={{marginVertical: margin}}>
