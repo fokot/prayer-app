@@ -3,6 +3,11 @@ Run with
 expo start
 ```
 
+Publish new version which will be automatically downloaded to app
+```bash
+expo publish
+```
+
 Build like
 ```bash
 expo build:android
