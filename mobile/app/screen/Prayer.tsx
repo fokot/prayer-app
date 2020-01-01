@@ -84,7 +84,8 @@ export const Prayer = ({navigation}: NavigationProps) => {
 
             <AppText
               style={{
-                paddingTop: 16
+                paddingTop: 16,
+                paddingBottom: tabBarHeight + 100,
               }}
             >{prayer.text}</AppText>
           </ScrollView>

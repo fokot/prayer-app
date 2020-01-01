@@ -96,6 +96,7 @@ export const PrayerEdit = ({navigation}: NavigationProps) => {
                 fontWeight: 'bold',
                 color: textColor,
                 fontSize: 32,
+                paddingBottom: tabBarHeight + 100,
               }}
               value={prayer.text}
               placeholder={translate['Text']}
