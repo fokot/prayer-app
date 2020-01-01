@@ -9,7 +9,7 @@
       "android",
       "web"
     ],
-    "version": "1.0.5",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -25,7 +25,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.fokot.prayerapp"
+      "bundleIdentifier": "com.fokot.prayerapp",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes on accompanying web based editor."
+      }
     },
     "android": {
       "package": "com.fokot.prayerApp",
