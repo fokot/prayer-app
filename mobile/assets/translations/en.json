@@ -12,5 +12,6 @@
   "Cancel": "Cancel",
   "Name": "Name",
   "Text": "Text",
-  "NoName": "Name must be set"
+  "NoName": "Name must be set",
+  "NewPrayer": "New prayer"
 }

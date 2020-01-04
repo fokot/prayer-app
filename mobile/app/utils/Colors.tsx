@@ -17,3 +17,4 @@ export const black = 'black';
 export const grey = '#808080';
 export const greyLight = '#b3b3b3';
 export const greyDark = '#333333';
+export const purple = '#9b59b6';
