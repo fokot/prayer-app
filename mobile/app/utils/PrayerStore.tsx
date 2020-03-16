@@ -1,5 +1,5 @@
 import {AsyncStorage} from 'react-native';
-import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, prepend, toPairs} from "ramda";
+import {append, assoc, concat, dissoc, fromPairs, mergeDeepRight, without, pick, prepend, toPairs} from "ramda";
 import {createStore} from "./Store";
 import uuid from 'uuid/v1';
 import {useEffect} from "react";
@@ -66,9 +66,9 @@ type StoreType = {
     darkMode: boolean,
     fontSize: number,
   },
-  prayers: {[index: string]: Prayer},
-  allPrayerIds: string[],
-  favoritePrayerIds: string[],
+  prayers: {[index: ID]: Prayer},
+  allPrayerIds: ID[],
+  favoritePrayerIds: ID[],
 }
 
 type SettingsType = StoreType['settings'];
@@ -244,20 +244,27 @@ export const addCdnPrayers = async (fileName: string) => {
 };
 
 const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<ID>) => {
-  const idsToDelete = currentStore().allPrayerIds;
+  // do not delete favorite prayers
+  const existingFavoritePrayerIds = currentStore().favoritePrayerIds;
+  const idsToDelete = without(existingFavoritePrayerIds, currentStore().allPrayerIds);
   const pairs: Array<[string, Prayer]> = prayers.map(p => [p.id, p]);
   const store = updateStore(
     s => ({
       ...s,
-      prayers: fromPairs(pairs),
-      allPrayerIds: prayers.map(p => p.id),
-      favoritePrayerIds,
+      prayers:
+        fromPairs(
+        concat(
+          toPairs(pick(existingFavoritePrayerIds, s.prayers)),
+          pairs
+        )),
+      allPrayerIds: concat(existingFavoritePrayerIds, prayers.map(p => p.id)),
+      favoritePrayerIds: concat(existingFavoritePrayerIds, favoritePrayerIds),
     })
   );
   await dbDeletePrayers(idsToDelete);
   await dbSavePrayers(pairs);
   await dbSetAllPrayerIds(store.allPrayerIds);
-  await dbSetFavoritePrayerIds(favoritePrayerIds);
+  await dbSetFavoritePrayerIds(store.favoritePrayerIds);
 };
 
 export const replaceCdnPrayers = async (fileName: string) => {
