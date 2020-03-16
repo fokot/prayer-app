@@ -5,6 +5,8 @@ expo start
 
 Publish new version which will be automatically downloaded to app
 ```bash
+git commit
+./generate-version.sh
 expo publish
 ```
 
