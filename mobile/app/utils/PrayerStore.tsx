@@ -245,7 +245,7 @@ export const addCdnPrayers = async (fileName: string) => {
 
 const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<ID>, deleteFavorites: Boolean) => {
   // do not delete favorite prayers
-  const existingFavoritePrayerIds = deleteFavorites ? currentStore().favoritePrayerIds : [];
+  const existingFavoritePrayerIds = deleteFavorites ? [] : currentStore().favoritePrayerIds;
   const idsToDelete = without(existingFavoritePrayerIds, currentStore().allPrayerIds);
   const pairs: Array<[string, Prayer]> = prayers.map(p => [p.id, p]);
   const store = updateStore(
@@ -262,7 +262,7 @@ const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<I
     })
   );
   await dbDeletePrayers(idsToDelete);
-  await dbSavePrayers(pairs);
+  await dbSavePrayers(pairs)
   await dbSetAllPrayerIds(store.allPrayerIds);
   await dbSetFavoritePrayerIds(store.favoritePrayerIds);
 };
