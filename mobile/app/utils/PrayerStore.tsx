@@ -243,9 +243,9 @@ export const addCdnPrayers = async (fileName: string) => {
   await dbSetAllPrayerIds(store.allPrayerIds);
 };
 
-const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<ID>) => {
+const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<ID>, deleteFavorites: Boolean) => {
   // do not delete favorite prayers
-  const existingFavoritePrayerIds = currentStore().favoritePrayerIds;
+  const existingFavoritePrayerIds = deleteFavorites ? currentStore().favoritePrayerIds : [];
   const idsToDelete = without(existingFavoritePrayerIds, currentStore().allPrayerIds);
   const pairs: Array<[string, Prayer]> = prayers.map(p => [p.id, p]);
   const store = updateStore(
@@ -270,13 +270,13 @@ const replacePrayers = async (prayers: Array<Prayer>, favoritePrayerIds: Array<I
 export const replaceCdnPrayers = async (fileName: string) => {
   const prayersFromCdn = await loadCdnPrayers(fileName);
   const prayers = prayersFromCdn.map(p => ({...p, id: uuid()}));
-  await replacePrayers(prayers, []);
+  await replacePrayers(prayers, [], false);
 };
 
 export const replaceFromWeb = async (prayersFromWeb: Array<PrayerFull>) => {
   const prayers = prayersFromWeb.map(({favorite, ...p}) => p);
   const favoritePrayerIds = prayersFromWeb.filter(p => p.favorite).map(p => p.id);
-  await replacePrayers(prayers, favoritePrayerIds);
+  await replacePrayers(prayers, favoritePrayerIds, true);
 };
 
 const translationGetters = {
