@@ -1,0 +1,18 @@
+[
+  {
+    "name": "SA Slovensky",
+    "file": "sa-slovak.json"
+  },
+  {
+    "name": "SA English from Nicholas",
+    "file": "sa-english.json"
+  },
+  {
+    "name": "SA English from Nicholas (G-d)",
+    "file": "sa-english-g-d.json"
+  },
+  {
+    "name": "AA Slovensky",
+    "file": "aa-slovak.json"
+  }
+]

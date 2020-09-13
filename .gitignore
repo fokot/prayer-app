@@ -12,7 +12,6 @@ mobile/app/version.json
 .idea
 *.iml
 *.log
-/prayers
 .stack-work
 web/elm-stuff
 web/elm.js
