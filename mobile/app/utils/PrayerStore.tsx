@@ -217,7 +217,8 @@ export const useFavoritePrayers = () => useStore(s => s.favoritePrayerIds.map(id
 
 // NETWORK
 
-const STORAGE_PATH = 'https://storage.googleapis.com/prayer-app/prayers/';
+// const STORAGE_PATH = 'https://storage.googleapis.com/prayer-app/prayers/';
+const STORAGE_PATH = 'https://raw.githubusercontent.com/fokot/prayer-app/master/prayers/';
 
 export const getCdnPrayers = () =>
   fetch(`${STORAGE_PATH}all.json`).then(x => x.json());
