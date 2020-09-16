@@ -44,3 +44,10 @@ To deploy to app store run
 expo build:ios
 expo upload:ios --apple-id XXX --apple-id-password XXX
 ```
+
+show and revert expo js publish
+```
+expo publish:history --count 10
+
+expo publish:set --publish-id <publicationId> -c default  
+```
